@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>สรุปภาพรวมระบบ: แดชบอร์ดวาระคงเหลือ & ระบบแจ้งเตือนอัตโนมัติ (Life Countdown)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg-base: #090d16;
+      --bg-surface: #0f172a;
+      --bg-surface-elevated: #1e293b;
+      --bg-surface-hover: #27354f;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-strong: rgba(255, 255, 255, 0.16);
+      --primary: #3b82f6;
+      --primary-glow: rgba(59, 130, 246, 0.25);
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --indigo: #6366f1;
+      --cyan: #06b6d4;
+      --emerald-dopa: #15803d;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --font-sans: 'Plus Jakarta Sans', 'Noto Sans Thai', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar Navigation */
+    aside.sidebar {
+      width: 290px;
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border-subtle);
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      display: flex;
+      flex-direction: column;
+      z-index: 50;
+    }
+
+    .sidebar-header {
+      padding: 24px 20px 16px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .app-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .app-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #15803d 0%, #3b82f6 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .app-title {
+      font-weight: 700;
+      font-size: 1.1rem;
+      letter-spacing: -0.01em;
+      color: #fff;
+    }
+
+    .app-subtitle {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .nav-list {
+      list-style: none;
+      padding: 16px 12px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .nav-category {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-dim);
+      padding: 12px 10px 6px;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: 8px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      margin-bottom: 2px;
+    }
+
+    .nav-link:hover {
+      background: var(--bg-surface-elevated);
+      color: #fff;
+      transform: translateX(3px);
+    }
+
+    .nav-link.active {
+      background: var(--primary);
+      color: #fff;
+      font-weight: 600;
+      box-shadow: 0 4px 12px var(--primary-glow);
+    }
+
+    .nav-badge {
+      margin-left: auto;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 2px 7px;
+      border-radius: 99px;
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+    }
+
+    /* Main Content Area */
+    main.main-content {
+      margin-left: 290px;
+      flex: 1;
+      padding: 40px 48px 100px;
+      max-width: 1300px;
+    }
+
+    /* Hero Banner */
+    .hero-banner {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.95) 100%);
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      padding: 36px 40px;
+      margin-bottom: 40px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .hero-banner::before {
+      content: '';
+      position: absolute;
+      top: -100px;
+      right: -100px;
+      width: 320px;
+      height: 320px;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.18) 0%, rgba(0, 0, 0, 0) 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .hero-banner::after {
+      content: '';
+      position: absolute;
+      bottom: -80px;
+      left: 20%;
+      width: 260px;
+      height: 260px;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, rgba(0, 0, 0, 0) 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(59, 130, 246, 0.15);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      color: #93c5fd;
+      padding: 4px 12px;
+      border-radius: 99px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .hero-title {
+      font-size: 2.2rem;
+      font-weight: 800;
+      line-height: 1.25;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #ffffff 30%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-desc {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      max-width: 850px;
+      line-height: 1.6;
+    }
+
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 28px;
+    }
+
+    .stat-card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 16px 20px;
+      backdrop-filter: blur(8px);
+    }
+
+    .stat-card .label {
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .stat-card .value {
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: #fff;
+      margin-top: 4px;
+      font-family: var(--font-mono);
+    }
+
+    /* Section Styles */
+    section.content-section {
+      margin-bottom: 56px;
+      scroll-margin-top: 30px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .section-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--bg-surface-elevated);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .section-title {
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.01em;
+    }
+
+    /* Card Grid */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+      gap: 24px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 24px;
+      transition: all 0.25s ease;
+      position: relative;
+    }
+
+    .card:hover {
+      border-color: var(--border-strong);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-text {
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      line-height: 1.6;
+    }
+
+    .card-badge {
+      font-size: 0.72rem;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-family: var(--font-mono);
+    }
+
+    .badge-primary { background: rgba(59, 130, 246, 0.2); color: #93c5fd; }
+    .badge-success { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
+    .badge-warning { background: rgba(245, 158, 11, 0.2); color: #fcd34d; }
+    .badge-danger { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+    .badge-purple { background: rgba(139, 92, 246, 0.2); color: #c4b5fd; }
+
+    /* Mermaid Diagrams Container */
+    .diagram-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 28px;
+      margin: 20px 0;
+      overflow-x: auto;
+    }
+
+    .diagram-header {
+      margin-bottom: 20px;
+    }
+
+    .diagram-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .diagram-subtitle {
+      font-size: 0.82rem;
+      color: var(--text-dim);
+    }
+
+    /* Table Styles */
+    .table-container {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      overflow: hidden;
+      margin: 20px 0;
+    }
+
+    table.custom-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+
+    table.custom-table th {
+      background: var(--bg-surface-elevated);
+      color: var(--text-main);
+      padding: 14px 18px;
+      font-weight: 600;
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    table.custom-table td {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+    }
+
+    table.custom-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    table.custom-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+      color: var(--text-main);
+    }
+
+    /* Code Blocks */
+    .code-box {
+      background: #060a12;
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 16px 20px;
+      font-family: var(--font-mono);
+      font-size: 0.84rem;
+      color: #38bdf8;
+      overflow-x: auto;
+      position: relative;
+      margin-top: 10px;
+    }
+
+    .code-box pre {
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    /* Step flow */
+    .steps-container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin: 20px 0;
+    }
+
+    .step-item {
+      display: flex;
+      gap: 18px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 20px 24px;
+    }
+
+    .step-number {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3b82f6, #6366f1);
+      color: #fff;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 0.95rem;
+    }
+
+    .step-content {
+      flex: 1;
+    }
+
+    .step-heading {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    .step-description {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    /* Highlights list */
+    ul.feature-list {
+      list-style: none;
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    ul.feature-list li {
+      position: relative;
+      padding-left: 24px;
+      color: var(--text-muted);
+      font-size: 0.92rem;
+    }
+
+    ul.feature-list li::before {
+      content: '✓';
+      position: absolute;
+      left: 0;
+      color: var(--success);
+      font-weight: 700;
+    }
+
+    /* Footer */
+    footer.page-footer {
+      margin-top: 80px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border-subtle);
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 0.85rem;
+    }
+
+    @media (max-width: 900px) {
+      aside.sidebar {
+        display: none;
+      }
+      main.main-content {
+        margin-left: 0;
+        padding: 24px 20px;
+      }
+      .grid-2, .grid-3 {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="app-brand">
+        <div class="app-logo">📋</div>
+        <div>
+          <h1 class="app-title">Life Countdown</h1>
+          <p class="app-subtitle">ระบบบริหารจัดการวาระ & แจ้งเตือน</p>
+        </div>
+      </div>
+    </div>
+    <ul class="nav-list">
+      <li class="nav-category">สารบัญเนื้อหา</li>
+      <li><a href="#overview" class="nav-link active"><span>📌</span> ภาพรวมระบบ (Overview)</a></li>
+      <li><a href="#architecture" class="nav-link"><span>🏗️</span> สถาปัตยกรรม (Architecture)</a></li>
+      <li><a href="#data-engine" class="nav-link"><span>⚙️</span> วิธีการคำนวณวาระคงเหลือ</a></li>
+      <li><a href="#notifications" class="nav-link"><span>🔔</span> การแจ้งเตือน 3 รูปแบบ</a></li>
+      <li><a href="#integrations" class="nav-link"><span>🔌</span> การเชื่อมต่อภายนอก (Integrations)</a></li>
+      <li><a href="#smtp-engine" class="nav-link"><span>✉️</span> Native SMTP & ความปลอดภัย</a></li>
+      <li><a href="#database" class="nav-link"><span>🗄️</span> ฐานข้อมูล & การบันทึก Audit</a></li>
+      <li><a href="#deployment" class="nav-link"><span>🚀</span> โหมดรัน & การ Deploy</a></li>
+    </ul>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="main-content">
+
+    <!-- Hero Banner -->
+    <header class="hero-banner" id="overview">
+      <div class="hero-tag">🌟 ระบบติดตามวาระเจ้าหน้าที่ปกครองท้องที่</div>
+      <h1 class="hero-title">แดชบอร์ดวาระคงเหลือ & ระบบแจ้งเตือนอัตโนมัติ</h1>
+      <p class="hero-desc">
+        ระบบเว็บแอปพลิเคชันระดับองค์กรสำหรับติดตาม <strong>วาระคงเหลือ (Days-Left Countdown)</strong> ของเจ้าหน้าที่ประจำพื้นที่ 
+        (ผู้ใหญ่บ้าน, กำนัน, และผู้ช่วยผู้ใหญ่บ้าน) คำนวณวันคงเหลือสดแบบ <strong>Real-time</strong> ตามโซนเวลาประเทศไทย (Asia/Bangkok) 
+        พร้อมระบบขับเคลื่อนการส่งอีเมลแจ้งเตือนอัตโนมัติล่วงหน้า 6 เดือน, 1 เดือน และสรุปประจำปี โดยไม่พึ่งพา Third-party Library ภายนอกที่ไม่จำเป็น
+      </p>
+
+      <div class="hero-stats">
+        <div class="stat-card">
+          <div class="label">โซนเวลาหลัก</div>
+          <div class="value" style="color: #60a5fa;">Asia/Bangkok</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">กลุ่มเป้าหมายที่ดูแล</div>
+          <div class="value" style="color: #34d399;">3 ตำแหน่งหลัก</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">ช่องทางแจ้งเตือน</div>
+          <div class="value" style="color: #fbbf24;">Native SMTP / Email</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">การจัดเก็บข้อมูล</div>
+          <div class="value" style="color: #a78bfa;">Sheets / Supabase / SQLite</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Section 1: สถาปัตยกรรมการทำงาน -->
+    <section class="content-section" id="architecture">
+      <div class="section-header">
+        <div class="section-icon">🏗️</div>
+        <h2 class="section-title">สถาปัตยกรรมการทำงานของระบบ (System Architecture)</h2>
+      </div>
+
+      <div class="diagram-card">
+        <div class="diagram-header">
+          <div class="diagram-title">แผนผังภาพรวมการไหลของข้อมูล (Data Flow & Architecture)</div>
+          <div class="diagram-subtitle">แสดงการเชื่อมโยงตั้งแต่แหล่งข้อมูล การประมวลผลคำนวณ จนถึงแดชบอร์ดและการแจ้งเตือนอีเมล</div>
+        </div>
+        <pre class="mermaid">
+flowchart TB
+    subgraph DataSources ["📥 แหล่งข้อมูลต้นทาง (Data Sources)"]
+        CSV["📄 CSV File<br/>(data/vara_utf8.csv)"]
+        Sheets["📊 Google Sheets API v4<br/>(Service Account RS256 JWT)"]
+    end
+
+    subgraph CoreEngine ["⚙️ เครื่องมือคำนวณ & กรองข้อมูล (Core Business Logic)"]
+        Dates["📅 Date & Calendar Math<br/>(RFC 4180 / Asia/Bangkok / Thai Year)"]
+        Model["🧮 Model & Filter Engine<br/>(คำนวณวันคงเหลือสด, จัดกลุ่ม 3 ตำแหน่ง)"]
+    end
+
+    subgraph Presentation ["💻 ส่วนแสดงผล (Frontend Dashboard)"]
+        UI["🖥️ Real-time Web Dashboard<br/>(KPIs, Search, Status Filter, Midnight Rollover)"]
+        AdminDrawer["⚙️ Admin Settings Drawer<br/>(จัดการเกณฑ์, SMTP, เทมเพลต, บันทึก Log)"]
+    end
+
+    subgraph NotificationEngine ["🔔 ระบบแจ้งเตือนอัตโนมัติ (Notification Engine)"]
+        Scheduler["⏰ Scheduler / Cron<br/>(Local Tick 5m / Vercel Cron 08:00)"]
+        Deduplication["🛡️ Deduplication & State Claim<br/>(notification_key UNIQUE + Atomic Claim)"]
+        TemplateEngine["📝 Email Templates (UI/UX Pro Max)<br/>(Sarabun Font / M365 Group Safe / HTML Tables)"]
+        SMTPClient["✉️ Native SMTP Client<br/>(Node.js Net/TLS / Port 465, 587 / RFC 2047)"]
+    end
+
+    subgraph Storage ["🗄️ ฐานข้อมูลและ Audit Log (State & History)"]
+        SQLite["💾 Local SQLite Database<br/>(wara_notifications.db)"]
+        Supabase["☁️ Supabase PostgreSQL<br/>(system_settings, notification_events, audit_log)"]
+    end
+
+    subgraph Recipients ["📬 ผู้รับอีเมลปลายทาง (Target Recipients)"]
+        Officer["👤 เจ้าหน้าที่รายบุคคล<br/>(ผญบ. / กำนัน / ผู้ช่วยฯ)"]
+        AdminGroup["🏢 ผู้บริหาร & ทีมงานอำเภอ<br/>(Microsoft 365 Group / Mailbox)"]
+    end
+
+    DataSources --> CoreEngine
+    CoreEngine --> Presentation
+    CoreEngine --> NotificationEngine
+    NotificationEngine --> Storage
+    NotificationEngine --> SMTPClient
+    SMTPClient --> Recipients
+        </pre>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">
+            <span>💻 สถาปัตยกรรมฝั่ง Client (Dashboard)</span>
+            <span class="card-badge badge-primary">Zero-Build</span>
+          </div>
+          <p class="card-text">
+            สร้างด้วย <strong>Pure ES Modules (Vanilla JS + Modern CSS)</strong> ไม่ต้องผ่านขั้นตอนการ Build ที่ซับซ้อน โหลดเร็วระดับมิลลิวินาที 
+            มีระบบตรวจจับการเปลี่ยนวันอัตโนมัติเมื่อเที่ยงคืน (Midnight Rollover) พร้อม Drawer สำหรับผู้ดูแลระบบที่ล็อกด้วย <code>ADMIN_TOKEN</code>
+          </p>
+          <ul class="feature-list">
+            <li>คำนวณวันคงเหลือสดในเบราว์เซอร์จากวันที่สิ้นสุดจริง</li>
+            <li>ค้นหาแบบ Instant Search ครอบคลุมทุกฟิลด์ (ชื่อ, ตำแหน่ง, หมู่บ้าน, ตำบล, เบอร์โทร)</li>
+            <li>สลับมุมมองและกรองสถานะ (ดำรงวาระ, ใกล้หมดวาระ, หมดวาระแล้ว, ข้อมูลไม่สมบูรณ์)</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <span>⚙️ สถาปัตยกรรมฝั่ง Server (Engine)</span>
+            <span class="card-badge badge-success">Zero-Dependency</span>
+          </div>
+          <p class="card-text">
+            รันบน <strong>Node.js Native Modules</strong> (<code>node:net</code>, <code>node:tls</code>, <code>node:crypto</code>, <code>node:sqlite</code>) 
+            ไม่มี Dependency ภายนอกที่ไม่จำเป็น ทำให้มีความเสถียรสูง ปลอดภัยจาก Supply Chain Attack และเบามาก
+          </p>
+          <ul class="feature-list">
+            <li>รองรับทั้งโหมด Local Server (Dev) และ Serverless Functions บน Vercel (Production)</li>
+            <li>ระบบป้องกันการส่งซ้ำระดับ Database (Idempotent Notification Key)</li>
+            <li>บันทึกประวัติการส่งอีเมลแบบ Deterministic Snapshot และ Audit Log ครบถ้วน</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: วิธีการคำนวณวันคงเหลือ -->
+    <section class="content-section" id="data-engine">
+      <div class="section-header">
+        <div class="section-icon">⚙️</div>
+        <h2 class="section-title">วิธีการคำนวณและประมวลผลข้อมูล (Calculation Logic)</h2>
+      </div>
+
+      <div class="steps-container">
+        <div class="step-item">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h3 class="step-heading">อ่านและแปลงข้อความวาระภาษาไทย (Parse Duration)</h3>
+            <p class="step-description">
+              ระบบรับชุดข้อมูลต้นทางซึ่งระบุวาระในรูปแบบข้อความไทย เช่น <code>"5 ปี 1 เดือน"</code>, <code>"0 ปี 2 เดือน"</code>, <code>"3 เดือน 15 วัน"</code> หรือตัวเลขไทย (๑-๙) 
+              จากนั้นฟังก์ชัน <code>parseDurationWara()</code> จะแปลงเป็นโครงสร้างข้อมูลระยะเวลา <code>{ years, months, days }</code>
+            </p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h3 class="step-heading">หา "วันที่สิ้นสุดวาระที่แท้จริง" (Calculate Term End Date)</h3>
+            <p class="step-description">
+              นำระยะเวลาที่แปลงได้ไปบวกเข้ากับ <strong>วันที่อ้างอิงข้อมูล (Reference Date)</strong> โดยใช้คณิตศาสตร์ปฏิทินแบบ Calendar-Accurate (รองรับปีอธิกสุรทินและการปัดวันเกินเดือนอย่างถูกต้อง):
+            </p>
+            <div class="code-box">
+              <pre>วันที่สิ้นสุดวาระ (Term End Date) = วันที่อ้างอิงข้อมูล (Reference Date) + ระยะเวลาวาระคงเหลือ</pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h3 class="step-heading">คำนวณ "วันคงเหลือแบบเรียลไทม์" (Live Days Left)</h3>
+            <p class="step-description">
+              คำนวณความต่างของวันระหว่าง "วันที่สิ้นสุดวาระ" กับ "วันที่ปัจจุบันในเวลาประเทศไทย (Asia/Bangkok UTC+7)" โดยใช้ <code>Date.UTC</code> เพื่อป้องกันความคลาดเคลื่อนจากเขตเวลาหรือการปรับเวลา:
+            </p>
+            <div class="code-box">
+              <pre>วันคงเหลือ (Days Left) = วันที่สิ้นสุดวาระ − วันนี้ (Asia/Bangkok)</pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-number">4</div>
+          <div class="step-content">
+            <h3 class="step-heading">การจำแนกสถานะ 4 ระดับ (Status Classification)</h3>
+            <div class="table-container" style="margin-top: 12px;">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>สถานะ</th>
+                    <th>เงื่อนไขทางคณิตศาสตร์</th>
+                    <th>ความหมายและการแสดงผล</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><span class="card-badge badge-success">🟢 ดำรงวาระ (Active)</span></td>
+                    <td><code>วันคงเหลือ &gt; เกณฑ์ (เช่น &gt; 30 วัน)</code></td>
+                    <td>ยังอยู่ในวาระปกติ ไม่ต้องดำเนินการเร่งด่วน</td>
+                  </tr>
+                  <tr>
+                    <td><span class="card-badge badge-warning">🟡 ใกล้หมดวาระ (Expiring Soon)</span></td>
+                    <td><code>0 ≤ วันคงเหลือ ≤ เกณฑ์ (รวมถึงวันสิ้นสุดพอดี 0 วัน)</code></td>
+                    <td>ต้องเตรียมกระบวนการสรรหา / เลือกตั้ง / ส่งมอบงาน</td>
+                  </tr>
+                  <tr>
+                    <td><span class="card-badge badge-danger">🔴 หมดวาระแล้ว (Expired)</span></td>
+                    <td><code>วันคงเหลือ &lt; 0</code></td>
+                    <td>สิ้นสุดการดำรงตำแหน่งแล้ว</td>
+                  </tr>
+                  <tr>
+                    <td><span class="card-badge" style="background: rgba(148, 163, 184, 0.2); color: #cbd5e1;">⚪ ข้อมูลไม่สมบูรณ์ (Invalid)</span></td>
+                    <td><code>ข้อมูลวาระว่าง / รูปแบบวันที่ไม่ถูกต้อง</code></td>
+                    <td>แสดงสัญลักษณ์ ⚠ และระบุสาเหตุข้อผิดพลาด ไม่ถูกนำไปคำนวณสถิติ</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: ระบบแจ้งเตือน 3 รูปแบบ -->
+    <section class="content-section" id="notifications">
+      <div class="section-header">
+        <div class="section-icon">🔔</div>
+        <h2 class="section-title">ระบบแจ้งเตือนอัตโนมัติ (Automated Notification System)</h2>
+      </div>
+
+      <p style="color: var(--text-muted); margin-bottom: 20px;">
+        ระบบขับเคลื่อนการแจ้งเตือนถูกออกแบบให้ส่งอีเมลอย่างตรงจุดตามวงรอบเวลาที่กำหนด พร้อมดีไซน์เทมเพลตมาตรฐานราชการ (Government Official Format)
+      </p>
+
+      <div class="grid-3">
+        <!-- 6 Month -->
+        <div class="card" style="border-top: 4px solid #f59e0b;">
+          <div class="card-title">
+            <span>1. เตือนล่วงหน้า 6 เดือน</span>
+            <span class="card-badge badge-warning">6-Month</span>
+          </div>
+          <p class="card-text">
+            <strong>ชนิด:</strong> <code>six_month</code><br>
+            <strong>เกณฑ์:</strong> วาระเหลือ ≤ 6 เดือน (180 วัน)<br>
+            <strong>ผู้รับ:</strong> เจ้าหน้าที่รายบุคคล + สำเนาผู้บริหาร/ทีมงานอำเภอ<br>
+            <strong>วัตถุประสงค์:</strong> แจ้งเตือนล่วงหน้าเพื่อเตรียมการวางแผนงบประมาณ การตรวจสอบคุณสมบัติ และกระบวนการสรรหาหรือเลือกตั้งใหม่
+          </p>
+          <div class="code-box" style="font-size: 0.78rem;">
+            <pre>หัวข้อ: รายงานวาระการดำรงตำแหน่ง 2569: [ชื่อบุคคล]</pre>
+          </div>
+        </div>
+
+        <!-- 1 Month -->
+        <div class="card" style="border-top: 4px solid #ef4444;">
+          <div class="card-title">
+            <span>2. เตือนล่วงหน้า 1 เดือน</span>
+            <span class="card-badge badge-danger">1-Month</span>
+          </div>
+          <p class="card-text">
+            <strong>ชนิด:</strong> <code>one_month</code><br>
+            <strong>เกณฑ์:</strong> วาระเหลือ ≤ 1 เดือน / ≤ 30 วัน (และวันหมดวาระพอดี)<br>
+            <strong>ผู้รับ:</strong> เจ้าหน้าที่รายบุคคล + สำเนาผู้บริหาร/ทีมงานอำเภอ<br>
+            <strong>วัตถุประสงค์:</strong> แจ้งเตือนขั้นวิกฤต เตรียมส่งมอบภารกิจและอุปกรณ์ทางราชการ และประกาศรับสมัครผู้มีสิทธิเข้ารับการคัดเลือก
+          </p>
+          <div class="code-box" style="font-size: 0.78rem;">
+            <pre>หัวข้อ: รายงานวาระการดำรงตำแหน่ง 2569: [ชื่อบุคคล]</pre>
+          </div>
+        </div>
+
+        <!-- Annual Summary -->
+        <div class="card" style="border-top: 4px solid #10b981;">
+          <div class="card-title">
+            <span>3. สรุปรายงานประจำปี</span>
+            <span class="card-badge badge-success">Annual Summary</span>
+          </div>
+          <p class="card-text">
+            <strong>ชนิด:</strong> <code>annual_summary</code><br>
+            <strong>เกณฑ์:</strong> รันทุกวันที่ 31 ธ.ค. หรือเวลา 09:00 น.<br>
+            <strong>ผู้รับ:</strong> ผู้บริหาร / นายอำเภอ / ทีมงานปกครอง<br>
+            <strong>วัตถุประสงค์:</strong> รายงานภาพรวมสถิติเจ้าหน้าที่ทั้งหมดที่จะครบวาระในปีนั้น พร้อมตารางรายชื่อแยกตามตำบล/หมู่บ้าน
+          </p>
+          <div class="code-box" style="font-size: 0.78rem;">
+            <pre>หัวข้อ: สรุปข้อมูลการหมดวาระประจำปี 2569</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 24px;">
+        <div class="card-title">
+          <span>🛡️ กลไกป้องกันการส่งซ้ำและการจัดการความผิดพลาด (Deduplication & Retry)</span>
+          <span class="card-badge badge-purple">Enterprise Grade</span>
+        </div>
+        <div class="grid-2" style="margin-top: 14px;">
+          <div>
+            <h4 style="color: #fff; font-size: 0.95rem; margin-bottom: 6px;">1. Unique Notification Key</h4>
+            <p style="color: var(--text-muted); font-size: 0.88rem;">
+              สร้างคีย์เฉพาะ <code>${type}:${personId}:${termEndDate}</code> ฝังเป็น Unique Constraint ในฐานข้อมูล ทำให้ไม่ว่าคำสั่ง Cron จะรันกี่รอบ ก็จะไม่มีทางส่งอีเมลซ้ำให้บุคคลเดิมในวาระเดิมเด็ดขาด
+            </p>
+          </div>
+          <div>
+            <h4 style="color: #fff; font-size: 0.95rem; margin-bottom: 6px;">2. Atomic State Claiming</h4>
+            <p style="color: var(--text-muted); font-size: 0.88rem;">
+              ก่อนเริ่มส่งเมล ระบบจะทำการเปลี่ยนสถานะจาก <code>pending</code> เป็น <code>sending</code> ทันที เพื่อป้องกันกรณีที่มี Worker รันคู่ขนานกันพร้อมกัน (Race Condition)
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: การเชื่อมต่อภายนอก -->
+    <section class="content-section" id="integrations">
+      <div class="section-header">
+        <div class="section-icon">🔌</div>
+        <h2 class="section-title">การเชื่อมต่อกับระบบภายนอก (Integrations & Connectors)</h2>
+      </div>
+
+      <div class="table-container">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>บริการภายนอก</th>
+              <th>โปรโตคอล / วิธีเชื่อมต่อ</th>
+              <th>หน้าที่และความรับผิดชอบในระบบ</th>
+              <th>ความปลอดภัย / การยืนยันตัวตน</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>📊 Google Sheets API v4</strong></td>
+              <td>HTTPS REST API (OAuth2)</td>
+              <td>ดึงข้อมูลรายชื่อบุคคล วาระคงเหลือ และอีเมลจาก Spreadsheet แบบ Real-time</td>
+              <td>Google Service Account ลงนามด้วย <code>RS256 JWT Private Key</code></td>
+            </tr>
+            <tr>
+              <td><strong>☁️ Supabase PostgreSQL</strong></td>
+              <td>PostgREST API / HTTPS</td>
+              <td>จัดเก็บ <code>system_settings</code>, <code>notification_events</code> และ <code>audit_log</code> ในโหมด Cloud</td>
+              <td><code>Service Role Key</code> + Row Level Security (RLS)</td>
+            </tr>
+            <tr>
+              <td><strong>✉️ SMTP Servers (Gmail / M365)</strong></td>
+              <td>TCP Socket (TLS 465 / STARTTLS 587)</td>
+              <td>นำส่งอีเมลแจ้งเตือนไปยังผู้รับปลายทางและ Group Mailbox</td>
+              <td>AUTH LOGIN / AUTH PLAIN + TLS Certificate Verification</td>
+            </tr>
+            <tr>
+              <td><strong>⚡ Vercel Platform</strong></td>
+              <td>Serverless Functions & Cron</td>
+              <td>โฮสต์เว็บแอปพลิเคชัน และตั้งเวลาสั่งรันการแจ้งเตือนอัตโนมัติ</td>
+              <td><code>CRON_SECRET</code> Bearer Authentication</td>
+            </tr>
+            <tr>
+              <td><strong>💾 Local SQLite Database</strong></td>
+              <td>Native File System (node:sqlite)</td>
+              <td>ฐานข้อมูลขนาดเบาสำหรับรันและทดสอบระบบบนเครื่องเครื่องพัฒนา (Local Mode)</td>
+              <td>Local File Permissions (<code>wara_notifications.db</code>)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Section 5: Native SMTP Client & ความปลอดภัย -->
+    <section class="content-section" id="smtp-engine">
+      <div class="section-header">
+        <div class="section-icon">✉️</div>
+        <h2 class="section-title">ระบบส่งอีเมล (Native SMTP Client & Security)</h2>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">
+            <span>🚀 จุดเด่นของ Native SMTP Client</span>
+            <span class="card-badge badge-primary">Custom Built</span>
+          </div>
+          <p class="card-text">
+            พัฒนาขึ้นด้วย <code>node:net</code> และ <code>node:tls</code> โดยตรง ไม่ต้องติดตั้งแพ็กเกจภายนอกอย่าง Nodemailer ทำให้ประหยัดทรัพยากรและลดความเสี่ยงด้านความปลอดภัย
+          </p>
+          <ul class="feature-list">
+            <li>รองรับทั้งพอร์ต <strong>465 (Implicit TLS)</strong> และ <strong>587/25 (STARTTLS)</strong></li>
+            <li>ระบบเข้ารหัสภาษาไทย <strong>RFC 2047 Word Wrapping</strong> ป้องกันชื่อภาษาไทยเพี้ยน</li>
+            <li>มี Timeout ทุกคำสั่ง ป้องกัน Socket ค้างตลอดไป</li>
+            <li>รองรับเทคนิค MIME Multipart ทั้ง HTML สวยงามและ Plain-text สำหรับโปรแกรมรุ่นเก่า</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <span>🛡️ มาตรฐานความเข้ากันได้ Microsoft 365</span>
+            <span class="card-badge badge-success">M365 Verified</span>
+          </div>
+          <p class="card-text">
+            ผ่านการปรับแต่งเพื่อให้ส่งเข้า <strong>Microsoft 365 Group Mailbox</strong> (เช่น <code>dopa-only-tm@forth.co.th</code>) ได้อย่างราบรื่นโดยไม่ถูก Anti-Spam กรองทิ้ง
+          </p>
+          <ul class="feature-list">
+            <li>ใส่ Header <code>Date:</code> ตามมาตรฐาน RFC 5322 อย่างเคร่งครัด</li>
+            <li>ละเว้น Header ที่ทำให้ M365 ตีความเป็น System Bot เช่น <code>Auto-Submitted</code></li>
+            <li>ใช้โครงสร้างตาราง HTML แบบทางการที่ผ่านตัวกรองความปลอดภัยระดับองค์กร</li>
+            <li>ไม่ส่งรหัสผ่าน <code>SMTP_PASS</code> ออกมายังเบราว์เซอร์เด็ดขาด</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 6: ฐานข้อมูล & Audit -->
+    <section class="content-section" id="database">
+      <div class="section-header">
+        <div class="section-icon">🗄️</div>
+        <h2 class="section-title">โครงสร้างฐานข้อมูลและการบันทึกประวัติ (Database & Audit)</h2>
+      </div>
+
+      <div class="table-container">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>ชื่อตาราง (Table Name)</th>
+              <th>ฟิลด์สำคัญ (Key Columns)</th>
+              <th>คำอธิบายหน้าที่</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>system_settings</code></td>
+              <td><code>key</code> (PK), <code>value</code>, <code>updated_at</code></td>
+              <td>เก็บการตั้งค่าระบบ เช่น เกณฑ์เดือน, รายชื่อผู้รับ, สถานะการเปิด/ปิดแจ้งเตือน</td>
+            </tr>
+            <tr>
+              <td><code>notification_events</code></td>
+              <td><code>id</code>, <code>notification_type</code>, <code>person_id</code>, <code>term_end_date</code>, <code>recipient_email</code>, <code>notification_key</code> (UNIQUE), <code>status</code>, <code>payload_snapshot</code>, <code>payload_hash</code></td>
+              <td>บันทึกรายการแจ้งเตือนแต่ละครั้ง พร้อมสถานะ (<code>pending</code>, <code>sending</code>, <code>sent</code>, <code>failed</code>) และ SHA-256 Hash สำหรับตรวจสอบย้อนหลัง</td>
+            </tr>
+            <tr>
+              <td><code>audit_log</code></td>
+              <td><code>id</code>, <code>actor</code>, <code>action</code>, <code>detail</code>, <code>created_at</code></td>
+              <td>บันทึกประวัติการกระทำของผู้ดูแลระบบ เช่น การสั่งรันรอบ, การแก้ไขการตั้งค่า, การส่งอีเมลทดสอบ</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Section 7: โหมดการทำงาน & การ Deploy -->
+    <section class="content-section" id="deployment">
+      <div class="section-header">
+        <div class="section-icon">🚀</div>
+        <h2 class="section-title">โหมดการทำงานและการ Deploy (Deployment Environments)</h2>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">
+            <span>💻 1. Local Development Mode</span>
+            <span class="card-badge badge-primary">Local</span>
+          </div>
+          <p class="card-text">
+            เหมาะสำหรับการพัฒนาในเครื่องคอมพิวเตอร์ ทำงานแบบครบวงจรโดยรันคำสั่งเดียว
+          </p>
+          <div class="code-box">
+            <pre># รันเซิร์ฟเวอร์ Local (พอร์ต 4173)
+npm start
+
+# รันเทสต์ทั้งหมด 32 ชุด
+npm test
+
+# สั่งรันรอบแจ้งเตือนทันที
+npm run notify</pre>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <span>☁️ 2. Cloud Serverless Mode (Vercel)</span>
+            <span class="card-badge badge-success">Production</span>
+          </div>
+          <p class="card-text">
+            ทำงานแบบไม่ต้องเปิดเซิร์ฟเวอร์ทิ้งไว้ ประหยัดค่าใช้จ่ายและพร้อมรองรับผู้ใช้งานจำนวนมาก
+          </p>
+          <ul class="feature-list">
+            <li><strong>Entry Points:</strong> <code>api/cron/notifications.js</code>, <code>api/notifications/*</code></li>
+            <li><strong>Cron Job:</strong> ตั้งเวลาทำงานทุกวันเวลา 08:00 น. ผ่าน <code>vercel.json</code></li>
+            <li><strong>Storage:</strong> ข้อมูลซิงค์กับ Supabase REST API & Google Sheets API</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="page-footer">
+      <p>รายงานสรุปสถาปัตยกรรมระบบแดชบอร์ดวาระคงเหลือ (Life Countdown Dashboard & Automated Notification Engine)</p>
+      <p style="margin-top: 4px;">จัดทำเพื่อการศึกษาและบริหารจัดการข้อมูลงานปกครองท้องที่ • โซนเวลา Asia/Bangkok</p>
+    </footer>
+
+  </main>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      themeVariables: {
+        darkMode: true,
+        background: '#0f172a',
+        primaryColor: '#1e293b',
+        primaryTextColor: '#f8fafc',
+        primaryBorderColor: '#3b82f6',
+        lineColor: '#60a5fa',
+        secondaryColor: '#15803d',
+        tertiaryColor: '#1e1b4b'
+      }
+    });
+
+    // Highlight active sidebar item on scroll
+    const sections = document.querySelectorAll('section.content-section, header.hero-banner');
+    const navLinks = document.querySelectorAll('aside.sidebar .nav-link');
+
+    window.addEventListener('scroll', () => {
+      let current = '';
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop - 120;
+        if (pageYOffset >= sectionTop) {
+          current = section.getAttribute('id');
+        }
+      });
+
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === `#${current}`) {
+          link.classList.add('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

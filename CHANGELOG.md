@@ -1,3 +1,13 @@
+## [2026-08-14 21:00]
+- **Files Modified:** `smtp-client.js`, `email-templates.js`, `data-source.js`, `notification-service.js`, `test-smtp.js`, `migration.sql`, `README-SMTP-Setup.md`, `package.json`, `CHANGELOG.md`
+- **Changes:**
+  - `smtp-client.js`: สร้าง Native SMTP Gmail client โดยใช้ Node.js built-in modules (`node:net`, `node:tls`, `node:crypto`) รองรับทั้ง Port 465 (Implicit TLS) และ 587 (STARTTLS), การยืนยันตัวตน AUTH PLAIN, RFC 5322 Date header, RFC 2047 Thai word encoding, และ MIME multipart (text/plain + text/html)
+  - `data-source.js`: สร้างโมดูลเชื่อมต่อ Google Sheets API v4 โดยใช้ RS256 JWT Service Account Signing และคำนวณวันคงเหลือจากข้อความวาระภาษาไทยและ Reference Date
+  - `email-templates.js`: สร้างเทมเพลตอีเมล Minimal/Clean รองรับ 3 รูปแบบแจ้งเตือน (6-Month, 1-Month, Annual Summary) ตามมาตรฐานความเข้ากันได้ของ Microsoft 365
+  - `notification-service.js`: สร้างระบบ Orchestrator ควบคุมวงรอบการแจ้งเตือน, การป้องกันการส่งซ้ำด้วย `notification_key` (Idempotent), Atomic state claiming (pending → sending → sent), Exponential backoff retry สูงสุด 3 ครั้ง, และบันทึก Audit Log ลง Supabase
+  - `migration.sql` & `README-SMTP-Setup.md`: จัดทำ SQL Schema และคู่มือการตั้งค่า Gmail App Password พร้อม Anti-spam verification checklist
+- **Reason:** พัฒนาระบบส่งอีเมลแจ้งเตือนวาระอัตโนมัติแบบ Native Zero-Dependency เพื่อความปลอดภัย ความเบา และประสิทธิภาพสูงสุดในการส่งเข้า Inbox ของผู้รับและ Microsoft 365 Group Mailbox
+
 ## [2026-08-14 16:35]
 - **Files Modified:** `server/email-templates.js`, `CHANGELOG.md`
 - **Changes:**

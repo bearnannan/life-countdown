@@ -7,8 +7,10 @@
     "start": "node server.js",
     "test": "node --test",
     "convert:csv": "node scripts/convert-csv.mjs",
-    "notify": "node server/scheduler.js",
-    "notify:once": "node server/scheduler.js"
+    "notify": "node notification-service.js",
+    "notify:scheduler": "node server/scheduler.js",
+    "test:smtp": "node test-smtp.js --check",
+    "test:send": "node test-smtp.js --send"
   },
   "engines": {
     "node": ">=22"
