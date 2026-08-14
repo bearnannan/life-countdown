@@ -1,0 +1,1406 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StockFlow — SMTP Server Configuration & Email System Technical Report</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg-primary: #0b0f19;
+      --bg-secondary: #111827;
+      --bg-card: #1e293b;
+      --bg-card-hover: #26334d;
+      --bg-code: #0f172a;
+      --accent-blue: #3b82f6;
+      --accent-cyan: #06b6d4;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #ef4444;
+      --accent-purple: #8b5cf6;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-highlight: rgba(59, 130, 246, 0.3);
+      --font-sans: 'Plus Jakarta Sans', 'Noto Sans Thai', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      font-size: 15px;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      line-height: 1.6;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar Navigation */
+    nav.sidebar {
+      width: 290px;
+      background-color: var(--bg-secondary);
+      border-right: 1px solid var(--border-color);
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      overflow-y: auto;
+      padding: 1.75rem 1.25rem;
+      z-index: 100;
+    }
+
+    .sidebar-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.75rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .sidebar-brand-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: white;
+      font-size: 1.2rem;
+      box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+    }
+
+    .sidebar-brand-text {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.2;
+    }
+
+    .sidebar-brand-text span {
+      font-size: 0.75rem;
+      color: var(--accent-blue);
+      display: block;
+      font-weight: 500;
+    }
+
+    .nav-group-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-dim);
+      margin: 1.25rem 0 0.5rem 0.5rem;
+    }
+
+    .nav-links {
+      list-style: none;
+    }
+
+    .nav-links li a {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.55rem 0.75rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.825rem;
+      font-weight: 500;
+      border-radius: 8px;
+      transition: all 0.15s ease;
+    }
+
+    .nav-links li a:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+    }
+
+    .nav-links li a.active {
+      background-color: rgba(59, 130, 246, 0.15);
+      color: var(--accent-blue);
+      font-weight: 600;
+      border-left: 3px solid var(--accent-blue);
+      border-radius: 2px 8px 8px 2px;
+    }
+
+    /* Main Content */
+    main.content {
+      margin-left: 290px;
+      flex: 1;
+      padding: 2.5rem 3rem;
+      max-width: 1250px;
+    }
+
+    .header-banner {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
+      border: 1px solid var(--border-highlight);
+      border-radius: 16px;
+      padding: 2rem 2.5rem;
+      margin-bottom: 2.5rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header-banner::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -10%;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .header-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(59, 130, 246, 0.15);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      color: var(--accent-blue);
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .header-title {
+      font-size: 1.85rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    .header-subtitle {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      max-width: 800px;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .meta-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .meta-label {
+      font-size: 0.725rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .meta-val {
+      font-size: 0.875rem;
+      color: var(--text-main);
+      font-weight: 600;
+      font-family: var(--font-mono);
+    }
+
+    /* Section Component */
+    section.doc-section {
+      margin-bottom: 3rem;
+      scroll-margin-top: 2rem;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .section-num {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--accent-blue);
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      font-family: var(--font-mono);
+    }
+
+    .section-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .doc-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      transition: border-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .doc-card:hover {
+      border-color: rgba(255, 255, 255, 0.18);
+    }
+
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Tables */
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      background-color: var(--bg-card);
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.825rem;
+    }
+
+    table.data-table th {
+      background-color: rgba(15, 23, 42, 0.8);
+      color: var(--text-muted);
+      padding: 0.75rem 1rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.7rem;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    table.data-table td {
+      padding: 0.8rem 1rem;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-main);
+      vertical-align: top;
+    }
+
+    table.data-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    table.data-table tr:hover td {
+      background-color: var(--bg-card-hover);
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.18rem 0.55rem;
+      border-radius: 6px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+    }
+
+    .badge-success { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-warning { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .badge-danger { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+    .badge-info { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+    .badge-purple { background: rgba(139, 92, 246, 0.15); color: #c084fc; border: 1px solid rgba(139, 92, 246, 0.3); }
+
+    /* Code Blocks */
+    code, pre {
+      font-family: var(--font-mono);
+    }
+
+    code.inline-code {
+      background-color: rgba(15, 23, 42, 0.9);
+      color: #38bdf8;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.775rem;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .code-block-wrapper {
+      background-color: var(--bg-code);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 1rem 0;
+    }
+
+    .code-block-header {
+      background-color: rgba(15, 23, 42, 0.6);
+      padding: 0.5rem 1rem;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      font-family: var(--font-mono);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    pre.code-content {
+      padding: 1rem;
+      font-size: 0.8rem;
+      color: #e2e8f0;
+      overflow-x: auto;
+      line-height: 1.5;
+    }
+
+    /* Process Flow Diagram Box */
+    .flow-box {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1rem 0;
+    }
+
+    .flow-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      position: relative;
+    }
+
+    .flow-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      padding: 0.85rem 1.1rem;
+      border-radius: 8px;
+    }
+
+    .flow-step-num {
+      background: var(--accent-blue);
+      color: white;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.75rem;
+      flex-shrink: 0;
+    }
+
+    .flow-step-content {
+      flex: 1;
+    }
+
+    .flow-step-title {
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: var(--text-main);
+    }
+
+    .flow-step-desc {
+      font-size: 0.775rem;
+      color: var(--text-muted);
+    }
+
+    /* Alerts */
+    .alert-box {
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+      display: flex;
+      gap: 0.85rem;
+      align-items: flex-start;
+      font-size: 0.825rem;
+    }
+
+    .alert-warning {
+      background-color: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #fcd34d;
+    }
+
+    .alert-danger {
+      background-color: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+    }
+
+    .alert-info {
+      background-color: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      color: #93c5fd;
+    }
+
+    .alert-icon {
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    /* Mermaid diagrams container */
+    .mermaid-wrapper {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      display: flex;
+      justify-content: center;
+      margin: 1rem 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+      nav.sidebar { display: none; }
+      main.content { margin-left: 0; padding: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar Navigation -->
+  <nav class="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-icon">SF</div>
+      <div class="sidebar-brand-text">
+        StockFlow Docs
+        <span>SMTP & Email System</span>
+      </div>
+    </div>
+
+    <div class="nav-group-title">สารบัญ (Table of Contents)</div>
+    <ul class="nav-links">
+      <li><a href="#summary" class="active">0. สรุปภาพรวม (Executive Summary)</a></li>
+      <li><a href="#ui-config">1. SMTP Configuration UI</a></li>
+      <li><a href="#backend-impl">2. SMTP Backend Implementation</a></li>
+      <li><a href="#sending-flow">3. Email Sending Flow</a></li>
+      <li><a href="#config-storage">4. Configuration Storage</a></li>
+      <li><a href="#security-config">5. Security Configuration</a></li>
+      <li><a href="#protocol-behavior">6. SMTP Protocol Behavior</a></li>
+      <li><a href="#email-service">7. Email Service Module</a></li>
+      <li><a href="#api-endpoints">8. API Endpoints</a></li>
+      <li><a href="#database-model">9. Database / Data Model</a></li>
+      <li><a href="#ui-mapping">10. UI → Backend Mapping</a></li>
+      <li><a href="#code-reference">11. Code Reference</a></li>
+      <li><a href="#status-classification">12. Implementation Status</a></li>
+      <li><a href="#known-issues">13. Known Issues & Audit</a></li>
+      <li><a href="#architecture">14. Technical Architecture</a></li>
+      <li><a href="#conclusion">15. Conclusion & Next Steps</a></li>
+    </ul>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="content">
+
+    <!-- Header Banner -->
+    <div class="header-banner">
+      <div class="header-badge">Technical Verification Report</div>
+      <h1 class="header-title">SMTP Server Configuration & Email System Summary</h1>
+      <p class="header-subtitle">
+        รายงานการวิเคราะห์และตรวจสอบซอร์สโค้ดของระบบกำหนดค่าเซิร์ฟเวอร์ส่งอีเมล SMTP และสถาปัตยกรรมการส่งอีเมลแจ้งเตือนใน StockFlow
+      </p>
+
+      <div class="meta-grid">
+        <div class="meta-item">
+          <span class="meta-label">Application</span>
+          <span class="meta-val">StockFlow v2.4.0</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Verified Target</span>
+          <span class="meta-val">Settings.jsx & api/send-email.js</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Mail Engine</span>
+          <span class="meta-val">Nodemailer (Vercel API)</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Report Date</span>
+          <span class="meta-val">2026-08-13</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 0: Executive Summary -->
+    <section id="summary" class="doc-section">
+      <div class="section-header">
+        <div class="section-num">0</div>
+        <h2 class="section-title">สรุปภาพรวมผู้บริหาร (Executive Summary)</h2>
+      </div>
+      
+      <div class="doc-card">
+        <p style="margin-bottom: 1rem;">
+          ระบบการส่งอีเมลและตั้งค่า SMTP ของแอปพลิเคชัน <strong>StockFlow</strong> ได้ถูกออกแบบและใช้งานจริงแบบ <strong>Hybrid Architecture</strong> โดยรวมเอาส่วนประสานงานผู้ใช้ (React Client) เข้ากับบริการฐานข้อมูล Supabase PostgreSQL (สำหรับจัดเก็บระบบ Vault ของรหัสผ่านและค่าคอนฟิก) และฟังก์ชัน Serverless <strong>Vercel Endpoint (Node.js + Nodemailer)</strong> สำหรับทำหน้าที่เป็น Mail Transport
+        </p>
+
+        <div class="card-grid">
+          <div style="background: rgba(15,23,42,0.6); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
+            <strong style="color: var(--accent-emerald); display: block; margin-bottom: 0.4rem;">✔ จุดเด่นที่ได้รับการตรวจสอบว่าใช้งานจริง</strong>
+            <ul style="font-size: 0.8rem; color: var(--text-muted); padding-left: 1.2rem; line-height: 1.6;">
+              <li>มีหน้าจอตั้งค่า SMTP พร้อมรองรับ Secure Password Vault (`system_secrets` table)</li>
+              <li>การเก็บรหัสผ่านแยกจากค่าคอนฟิกทั่วไป ไม่ส่งรหัสผ่าน Plaintext กลับมายัง Frontend</li>
+              <li>มีปุ่มและ Modal สำหรับทดสอบส่งอีเมล (Test Email) พร้อมระบบ Override คอนฟิกแบบเรียลไทม์</li>
+              <li>มี Graceful Fallback ไปยัง Supabase Native Auth เมื่อ Vercel Endpoint ออฟไลน์</li>
+              <li>รองรับสิทธิ์ `settings.update` ในการบันทึกข้อมูล พร้อมระบบ Audit Log ทุกธุรกรรม</li>
+            </ul>
+          </div>
+
+          <div style="background: rgba(15,23,42,0.6); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
+            <strong style="color: var(--accent-amber); display: block; margin-bottom: 0.4rem;">⚠️ ประเด็นข้อจำกัดที่พบใน Codebase</strong>
+            <ul style="font-size: 0.8rem; color: var(--text-muted); padding-left: 1.2rem; line-height: 1.6;">
+              <li>ปุ่ม/ตัวเลือก "Verify TLS Certificate" ใน UI ไม่ได้ถูกส่งไปใช้งานจริงใน Backend Vercel Endpoint (`api/send-email.js` ฮาร์ดโค้ด `rejectUnauthorized: false`)</li>
+              <li>ใน `api/send-email.js` มีการฮาร์ดโค้ดรหัสผ่าน fallback plain-text ในซอร์สโค้ด (Line 31)</li>
+              <li>`api/send-email.js` ตั้งค่า CORS แบบเปิดกว้าง (`Access-Control-Allow-Origin: '*'`) โดยไม่มีการยืนยัน Authenticated Bearer Token ใน HTTP Body</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 1: SMTP Configuration UI -->
+    <section id="ui-config" class="doc-section">
+      <div class="section-header">
+        <div class="section-num">1</div>
+        <h2 class="section-title">1. SMTP Configuration UI</h2>
+      </div>
+
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+        ส่วนประกอบ UI ทั้งหมดของ SMTP Server Configuration ถูกพัฒนาอยู่ภายในไฟล์ <code class="inline-code">src/pages/Settings.jsx</code> (บรรทัด 597–790 และ 996–1036) โดยมีรายละเอียดแต่ละช่องกรอกดังนี้:
+      </p>
+
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>UI Element</th>
+              <th>Source File & Lines</th>
+              <th>State Variable</th>
+              <th>Validation / Logic</th>
+              <th>API / RPC Called</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>SMTP Host</strong></td>
+              <td><code class="inline-code">src/pages/Settings.jsx:615-624</code></td>
+              <td><code class="inline-code">smtpForm.host</code></td>
+              <td>String trim, default fallback: <code class="inline-code">smtp.gmail.com</code></td>
+              <td><code class="inline-code">admin_update_system_settings</code></td>
+            </tr>
+            <tr>
+              <td><strong>SMTP Port</strong></td>
+              <td><code class="inline-code">src/pages/Settings.jsx:626-646</code></td>
+              <td><code class="inline-code">smtpForm.port</code></td>
+              <td>Auto-set <code class="inline-code">secure=true</code> เมื่อพอร์ตเป็น 465, และ <code class="inline-code">false</code> เมื่อเป็น 587/25</td>
+              <td><code class="inline-code">admin_update_system_settings</code></td>
+            </tr>
+            <tr>
+              <td><strong>SMTP Username</strong></td>
+              <td><code class="inline-code">src/pages/Settings.jsx:648-658</code></td>
+              <td><code class="inline-code">smtpForm.user</code></td>
+              <td>String trim</td>
+              <td><code class="inline-code">admin_update_system_settings</code></td>
+            </tr>
+            <tr>
+              <td><strong>Sender Email</strong></td>
+              <td><code class="inline-code">src/pages/Settings.jsx:663-673</code></td>
+              <td><code class="inline-code">smtpForm.sender_email</code></td>
+              <td>String trim</td>
+              <td><code class="inline-code">admin_update_system_settings</code></td>
+            </tr>
+            <tr>
+              <td><strong>Sender Name</strong></td>
+              <td><code class="inline-code">src/pages/Settings.jsx:675-685</code></td>
+              <td><code class="inline-code">smtpForm.sender_name</code></td>
+              <td>String trim, default: <code class="inline-code">StockFlow Notification</code></td>
+              <td><code class="inline-code">admin_update_system_settings</code></td>
+            </tr>
+            <tr>
+              <td><strong>SMTP Password</strong></td>
+              <td><code class="inline-code">src/pages/Settings.jsx:687-701</code></td>
+              <td><code class="inline-code">smtpForm.new_password</code></td>
+              <td>แสดงป้าย <code class="inline-code">(ตั้งค่าไว้แล้ว)</code> หาก <code class="inline-code">password_set: true</code>; ส่งไปบันทึกแยกต่างหาก</td>
+              <td><code class="inline-code">admin_update_smtp_password</code></td>
+            </tr>
+            <tr>
+              <td><strong>Security Protocol (Implicit vs STARTTLS)</strong></td>
+              <td><code class="inline-code">src/pages/Settings.jsx:712-727</code></td>
+              <td><code class="inline-code">smtpForm.secure</code></td>
+              <td><code class="inline-code">true</code> = Port 465 Implicit TLS<br><code class="inline-code">false</code> = Port 587/25 STARTTLS</td>
+              <td><code class="inline-code">admin_update_system_settings</code></td>
+            </tr>
+            <tr>
+              <td><strong>Verify TLS Certificate</strong></td>
+              <td><code class="inline-code">src/pages/Settings.jsx:735-748</code></td>
+              <td><code class="inline-code">smtpForm.reject_unauthorized</code></td>
+              <td>Checkbox boolean (<code class="inline-code">reject_unauthorized !== false</code>)</td>
+              <td><code class="inline-code">admin_update_system_settings</code></td>
+            </tr>
+            <tr>
+              <td><strong>Effective Config Banner</strong></td>
+              <td><code class="inline-code">src/pages/Settings.jsx:773-788</code></td>
+              <td>Derived from <code class="inline-code">smtpForm</code></td>
+              <td>แสดงผลสถานะ Host:Port, Protocol, และ Cert Check Verification ในแถบสรุป</td>
+              <td>N/A (UI State Display)</td>
+            </tr>
+            <tr>
+              <td><strong>Test Email Button & Modal</strong></td>
+              <td><code class="inline-code">src/pages/Settings.jsx:601-611, 996-1036</code></td>
+              <td><code class="inline-code">isTestEmailOpen</code>, <code class="inline-code">testEmailRecipient</code></td>
+              <td>ตรวจสอบ Email Regex: <code class="inline-code">/^[^\s@]+@[^\s@]+\.[^\s@]+$/</code></td>
+              <td><code class="inline-code">sendTestEmail()</code> in <code class="inline-code">emailService.js</code></td>
+            </tr>
+            <tr>
+              <td><strong>Save SMTP Server Button</strong></td>
+              <td><code class="inline-code">src/pages/Settings.jsx:792-798</code></td>
+              <td><code class="inline-code">savingCategory</code></td>
+              <td>ตรวจสอบสิทธิ์ <code class="inline-code">canUpdate</code> (`settings.update`)</td>
+              <td>RPC Calls (Settings & Password)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Section 2: SMTP Backend Implementation -->
+    <section id="backend-impl" class="doc-section">
+      <div class="section-header">
+        <div class="section-num">2</div>
+        <h2 class="section-title">2. SMTP Backend Implementation</h2>
+      </div>
+
+      <div class="doc-card">
+        <h3 class="card-title">การวิเคราะห์ฟังก์ชันเบื้องหลัง (Trace Source Code)</h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+          การทำงานของระบบ SMTP Backend ถูกแบ่งออกเป็น 2 ชั้นสถาปัตยกรรม (Database Serverless Vault & Vercel API Service):
+        </p>
+
+        <div class="card-grid">
+          <div style="background: rgba(15,23,42,0.6); padding: 1rem; border-radius: 8px;">
+            <strong style="color: var(--accent-blue);">1. PostgreSQL System Settings & Vault (Supabase)</strong>
+            <ul style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; line-height: 1.6;">
+              <li><strong>Config Loader:</strong> <code class="inline-code">admin_get_system_settings()</code> (Migration 11) รวบรวมค่าจากตาราง <code class="inline-code">system_settings</code></li>
+              <li><strong>Config Saver:</strong> <code class="inline-code">admin_update_system_settings()</code> (Migration 11) บันทึกค่า JSONB โดยยกเว้นรหัสผ่าน plain-text</li>
+              <li><strong>Password Vault:</strong> <code class="inline-code">admin_update_smtp_password()</code> (Migration 14 & 32) บันทึกรหัสผ่านในตาราง <code class="inline-code">system_secrets</code></li>
+              <li><strong>Password Retrieval:</strong> <code class="inline-code">admin_get_smtp_password_internal()</code> (Migration 14 & 31) ถูกจำกัดการเรียกใช้เฉพาะ <code class="inline-code">service_role</code></li>
+            </ul>
+          </div>
+
+          <div style="background: rgba(15,23,42,0.6); padding: 1rem; border-radius: 8px;">
+            <strong style="color: var(--accent-cyan);">2. Mail Transporter (Vercel Serverless Function)</strong>
+            <ul style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; line-height: 1.6;">
+              <li><strong>Endpoint File:</strong> <code class="inline-code">api/send-email.js</code></li>
+              <li><strong>Transporter Setup:</strong> <code class="inline-code">nodemailer.createTransport()</code> (Line 34)</li>
+              <li><strong>Authentication:</strong> <code class="inline-code">auth: { user, pass }</code> (Line 38-41)</li>
+              <li><strong>Port & TLS Handling:</strong> <code class="inline-code">secure: port === 465</code> (Line 37)</li>
+              <li><strong>Execution:</strong> <code class="inline-code">transporter.sendMail(mailOptions)</code> (Line 55)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: Email Sending Flow -->
+    <section id="sending-flow" class="doc-section">
+      <div class="section-header">
+        <div class="section-num">3</div>
+        <h2 class="section-title">3. Email Sending Flow & Test Email Flow</h2>
+      </div>
+
+      <div class="flow-box">
+        <h3 class="card-title" style="margin-bottom: 1rem;">ลำดับขั้นตอนการส่งอีเมลปกติ (Standard Email Flow)</h3>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="flow-step-num">1</div>
+            <div class="flow-step-content">
+              <div class="flow-step-title">Trigger Notification Event</div>
+              <div class="flow-step-desc">ระบบเกิดเหตุการณ์ (เช่น อนุมัติการเบิกจ่าย) หรือเรียกใช้ <code class="inline-code">sendStockFlowEmail()</code> จาก <code class="inline-code">emailService.js</code></div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num">2</div>
+            <div class="flow-step-content">
+              <div class="flow-step-title">Render Email Template</div>
+              <div class="flow-step-desc"><code class="inline-code">emailRenderer.js</code> ทำการแปลงตัวแปร <code class="inline-code">{{request_no}}</code>, <code class="inline-code">{{project_name}}</code> และสร้าง HTML layout</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num">3</div>
+            <div class="flow-step-content">
+              <div class="flow-step-title">POST Request to Vercel API</div>
+              <div class="flow-step-desc"><code class="inline-code">emailService.js</code> ยิง HTTP POST ไปยัง <code class="inline-code">/api/send-email</code> พร้อม Payload <code class="inline-code">{ to, subject, html, text }</code></div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num">4</div>
+            <div class="flow-step-content">
+              <div class="flow-step-title">Nodemailer Transporter Processing</div>
+              <div class="flow-step-desc"><code class="inline-code">api/send-email.js</code> อ่านค่า SMTP Config (จาก Overrides หรือ Environment Variables) และเชื่อมต่อไปยัง SMTP Server</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num">5</div>
+            <div class="flow-step-content">
+              <div class="flow-step-title">SMTP Transmission & Fallback</div>
+              <div class="flow-step-desc">หากส่งผ่าน Vercel API สำเร็จจะคืนค่า <code class="inline-code">messageId</code>; หาก Vercel API ล้มเหลว จะสลับไปใช้ Supabase Native Auth Fallback</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-box">
+        <h3 class="card-title" style="margin-bottom: 1rem;">ลำดับขั้นตอนการทดสอบส่งอีเมล (Test Email Flow)</h3>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="flow-step-num">1</div>
+            <div class="flow-step-content">
+              <div class="flow-step-title">Click "Test Email" & Input Recipient</div>
+              <div class="flow-step-desc">ผู้ใช้กดปุ่มในหน้า Settings และระบุอีเมลปลายทางใน Modal (<code class="inline-code">src/pages/Settings.jsx:996</code>)</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num">2</div>
+            <div class="flow-step-content">
+              <div class="flow-step-title">Construct SMTP Overrides Payload</div>
+              <div class="flow-step-desc">ดึงค่าจากฟอร์มในขณะนั้น (<code class="inline-code">host, port, secure, user, sender_email, sender_name, new_password</code>) จัดตั้งเป็น object <code class="inline-code">customSmtpOverrides</code></div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num">3</div>
+            <div class="flow-step-content">
+              <div class="flow-step-title">Execute sendTestEmail()</div>
+              <div class="flow-step-desc">เรียก <code class="inline-code">sendTestEmail(trimmedEmail, null, customSmtpOverrides)</code> ใน <code class="inline-code">emailService.js</code> ซึ่งสร้าง HTML ทดสอบด้วย <code class="inline-code">renderTestEmailHtml()</code></div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num">4</div>
+            <div class="flow-step-content">
+              <div class="flow-step-title">Direct Override Dispatch</div>
+              <div class="flow-step-desc"><code class="inline-code">api/send-email.js</code> ได้รับ <code class="inline-code">smtpOverrides</code> และใช้อัปเดต Transporter ชั่วคราวโดยตรงโดยไม่ต้องบันทึกลงฐานข้อมูลก่อน</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num">5</div>
+            <div class="flow-step-content">
+              <div class="flow-step-title">Feedback & Toast Notification</div>
+              <div class="flow-step-desc">แสดง <code class="inline-code">toast.success("ส่งอีเมลทดสอบสำเร็จ")</code> หรือ <code class="inline-code">toast.error()</code> แจ้งข้อผิดพลาดให้ผู้ใช้ทราบทันที</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: Configuration Storage -->
+    <section id="config-storage" class="doc-section">
+      <div class="section-header">
+        <div class="section-num">4</div>
+        <h2 class="section-title">4. Configuration Storage & Security Vault</h2>
+      </div>
+
+      <div class="doc-card">
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+          การจัดเก็บการตั้งค่า SMTP ใช้กลไกผสมผสานระหว่าง <strong>Database Tables (Supabase)</strong> และ <strong>Environment Variables (Vercel)</strong> เพื่อแยกแยะข้อมูลสาธารณะและข้อมูลความลับออกจากกัน:
+        </p>
+
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Storage Mechanism</th>
+                <th>Target Object / Key</th>
+                <th>Fields Stored</th>
+                <th>Security / Visibility</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Database Table</strong></td>
+                <td><code class="inline-code">public.system_settings</code> (Key: <code class="inline-code">smtp_config</code>)</td>
+                <td><code class="inline-code">host, port, secure, reject_unauthorized, user, sender_email, sender_name, password_set</code></td>
+                <td><span class="badge badge-info">RLS Enabled</span> อ่านได้เฉพาะ Authenticated users, แก้ไขได้เฉพาะผู้มีสิทธิ์ <code class="inline-code">settings.update</code></td>
+              </tr>
+              <tr>
+                <td><strong>Security Vault Table</strong></td>
+                <td><code class="inline-code">public.system_secrets</code> (Key: <code class="inline-code">smtp_password</code>)</td>
+                <td><code class="inline-code">secret_value</code> (Plaintext SMTP Password)</td>
+                <td><span class="badge badge-danger">Restricted RPC</span> ถูกล็อคด้วย Migration 31 ให้เรียกได้เฉพาะ <code class="inline-code">service_role</code> เท่านั้น ห้าม Browser access</td>
+              </tr>
+              <tr>
+                <td><strong>Environment Variables</strong></td>
+                <td>Vercel Deployment Environment</td>
+                <td><code class="inline-code">SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_SENDER_NAME</code></td>
+                <td><span class="badge badge-purple">Server-only</span> ใช้เป็น fallback หากไม่มีการส่ง <code class="inline-code">smtpOverrides</code> ผ่าน API Body</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="alert-box alert-info">
+          <div class="alert-icon">ℹ️</div>
+          <div>
+            <strong>การปกปิดข้อมูลความลับ (Masked Configuration Example):</strong><br>
+            • SMTP Host = <code class="inline-code">configured (smtp.gmail.com)</code><br>
+            • SMTP Username = <code class="inline-code">configured (stockflow.noreply.app@gmail.com)</code><br>
+            • SMTP Password = <code class="inline-code">******** (Vault Security Protected)</code>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 5: Security Configuration -->
+    <section id="security-config" class="doc-section">
+      <div class="section-header">
+        <div class="section-num">5</div>
+        <h2 class="section-title">5. Security Configuration Audit</h2>
+      </div>
+
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Security Control Area</th>
+              <th>Status</th>
+              <th>Implementation Verification Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>SMTP Password Protection</strong></td>
+              <td><span class="badge badge-success">Implemented</span></td>
+              <td>ใช้วิธีแยกเก็บในตาราง <code class="inline-code">system_secrets</code> ผ่าน RPC <code class="inline-code">admin_update_smtp_password</code> โดยไม่มีการคืนค่ารหัสผ่านกลับไปยัง Client จอภาพแสดงผลเพียงสถานะ <code class="inline-code">password_set: true</code></td>
+            </tr>
+            <tr>
+              <td><strong>TLS / SSL Protocol Control</strong></td>
+              <td><span class="badge badge-success">Implemented</span></td>
+              <td>ใน UI มีตัวเลือกระหว่าง Implicit TLS (Port 465, <code class="inline-code">secure: true</code>) และ STARTTLS (Port 587, <code class="inline-code">secure: false</code>) พร้อมระบบแจ้งเตือนเมื่อเลือกพอร์ตและโหมดไม่ตรงกัน</td>
+            </tr>
+            <tr>
+              <td><strong>TLS Certificate Verification</strong></td>
+              <td><span class="badge badge-warning">Partially Implemented</span></td>
+              <td>UI มี Checkbox <code class="inline-code">reject_unauthorized</code> และบันทึกลง <code class="inline-code">system_settings</code> แต่ใน <code class="inline-code">api/send-email.js</code> (Line 43) ยังคงฮาร์ดโค้ดเป็น <code class="inline-code">rejectUnauthorized: false</code></td>
+            </tr>
+            <tr>
+              <td><strong>Authentication & Authorization</strong></td>
+              <td><span class="badge badge-success">Implemented</span></td>
+              <td>การบันทึกการตั้งค่าถูกป้องกันด้วยสิทธิ์ <code class="inline-code">settings.update</code> ทั้งในระดับ UI (<code class="inline-code">canUpdate</code>) และระดับ Database RPC (<code class="inline-code">has_permission</code> check)</td>
+            </tr>
+            <tr>
+              <td><strong>API Endpoint Security</strong></td>
+              <td><span class="badge badge-warning">Partially Implemented</span></td>
+              <td><code class="inline-code">/api/send-email</code> ตั้งค่า CORS เป็น <code class="inline-code">Access-Control-Allow-Origin: '*'</code> และยังไม่มีการตรวจสอบ JWT Bearer Token ในส่วนหัว HTTP</td>
+            </tr>
+            <tr>
+              <td><strong>Input Validation</strong></td>
+              <td><span class="badge badge-success">Implemented</span></td>
+              <td>มีระบบตรวจสอบรูปแบบอีเมล (Email Regex) และการแปลงค่า Port เป็นตัวเลข ป้องกัน Injection ผ่าน Parameter ใน Frontend และ RPC</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Section 6: SMTP Protocol Behavior -->
+    <section id="protocol-behavior" class="doc-section">
+      <div class="section-header">
+        <div class="section-num">6</div>
+        <h2 class="section-title">6. SMTP Protocol Behavior</h2>
+      </div>
+
+      <div class="doc-card">
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+          พฤติกรรมการเชื่อมต่อระดับโปรโตคอลตามค่าคอนฟิกที่ระบุ:
+        </p>
+
+        <div class="card-grid">
+          <div style="background: rgba(15,23,42,0.6); padding: 1rem; border-radius: 8px;">
+            <strong style="color: var(--accent-blue);">Implicit TLS (Port 465)</strong>
+            <p style="font-size: 0.775rem; color: var(--text-muted); margin-top: 0.4rem;">
+              เมื่อตั้งค่า <code class="inline-code">port = 465</code> และ <code class="inline-code">secure = true</code>: Nodemailer จะทำการเริ่มการเชื่อมต่อผ่าน SSL/TLS Socket ทันทีตั้งแต่ TCP Handshake แรกกับ SMTP Server เหมาะสำหรับ Gmail และเซิร์ฟเวอร์ยี่ห้อมาตรฐาน
+            </p>
+          </div>
+
+          <div style="background: rgba(15,23,42,0.6); padding: 1rem; border-radius: 8px;">
+            <strong style="color: var(--accent-cyan);">Explicit TLS / STARTTLS (Port 587 / 25)</strong>
+            <p style="font-size: 0.775rem; color: var(--text-muted); margin-top: 0.4rem;">
+              เมื่อตั้งค่า <code class="inline-code">port = 587</code> (หรือ 25) และ <code class="inline-code">secure = false</code>: Nodemailer จะเชื่อมต่อในลักษณะ Plaintext TCP Socket ก่อน แล้วส่งคำสั่ง <code class="inline-code">STARTTLS</code> เพื่อยกระดับความปลอดภัยเป็น SSL/TLS ก่อนเริ่มส่งข้อความ
+            </p>
+          </div>
+        </div>
+
+        <div class="alert-box alert-warning" style="margin-top: 1rem;">
+          <div class="alert-icon">⚠️</div>
+          <div>
+            <strong>คำเตือนเรื่องการสับสนพอร์ตและโปรโตคอล (Port Mismatch Banners in UI):</strong><br>
+            • หากเลือก Port 465 แต่เลือก STARTTLS (<code class="inline-code">secure: false</code>) อาจเกิดข้อผิดพลาด Socket Timeout (ETIMEDOUT)<br>
+            • หากเลือก Port 587 แต่เลือก Implicit TLS (<code class="inline-code">secure: true</code>) อาจเกิดข้อผิดพลาด "Greeting never received"
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 7: Email Service -->
+    <section id="email-service" class="doc-section">
+      <div class="section-header">
+        <div class="section-num">7</div>
+        <h2 class="section-title">7. Email Service & Renderer Module</h2>
+      </div>
+
+      <div class="doc-card">
+        <h3 class="card-title">โมดูล <code class="inline-code">src/lib/emailService.js</code> & <code class="inline-code">src/lib/emailRenderer.js</code></h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+          ซอร์สโค้ดฝั่ง Client มีฟังก์ชันหลัก 3 ฟังก์ชันสำหรับประมวลผลและส่งอีเมล:
+        </p>
+
+        <ul style="font-size: 0.825rem; color: var(--text-muted); padding-left: 1.2rem; line-height: 1.8;">
+          <li><code class="inline-code">sendStockFlowEmail({ to, subject, html, text, smtpOverrides, actionUrl })</code> — ฟังก์ชันแกนหลักที่ทำหน้าที่ส่ง HTTP POST ไปยัง <code class="inline-code">/api/send-email</code> และตัดสลับไปใช้ Supabase Native Auth เมื่อมีข้อผิดพลาด</li>
+          <li><code class="inline-code">sendTestEmail(toEmail, eventType, smtpOverrides)</code> — ฟังก์ชันส่งอีเมลทดสอบจากหน้าตั้งค่า โดยเรียกใช้แม่แบบ <code class="inline-code">renderTestEmailHtml()</code></li>
+          <li><code class="inline-code">sendUserInvitationEmail({...})</code> — ฟังก์ชันส่งอีเมลคำเชิญผู้ใช้งานใหม่ พร้อมแม่แบบ HTML เฉพาะสำหรับต้อนรับสมาชิกใหม่</li>
+          <li><code class="inline-code">renderEmailHtml({ branding, template, data })</code> — ตัวสร้างโครงสร้าง HTML แบบ Inline Style ที่รองรับการแสดงผลบน Microsoft Outlook และ Gmail พร้อมแสดงรายการตารางวัสดุเบิกจ่าย</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Section 8: API Endpoints -->
+    <section id="api-endpoints" class="doc-section">
+      <div class="section-header">
+        <div class="section-num">8</div>
+        <h2 class="section-title">8. API Endpoints Specification</h2>
+      </div>
+
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Method & Route</th>
+              <th>Purpose</th>
+              <th>Request Body / Parameters</th>
+              <th>Response Payload</th>
+              <th>Auth Requirement</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge badge-success">POST</span> <code class="inline-code">/api/send-email</code></td>
+              <td>ส่งอีเมลผ่าน Vercel Nodemailer Transporter</td>
+              <td><code class="inline-code">{ to, subject, html, text, smtpOverrides }</code></td>
+              <td><code class="inline-code">{ success: true, messageId: "..." }</code></td>
+              <td>Public / CORS Wildcard (*)</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-purple">RPC</span> <code class="inline-code">admin_get_system_settings</code></td>
+              <td>ดึงค่าคอนฟิกระบบทั้งหมดไปแสดงผล</td>
+              <td>None</td>
+              <td><code class="inline-code">JSONB Object (Key-Value)</code></td>
+              <td>Authenticated + <code class="inline-code">settings.view</code></td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-purple">RPC</span> <code class="inline-code">admin_update_system_settings</code></td>
+              <td>บันทึกค่าคอนฟิกทั่วไปและ SMTP (ยกเว้นรหัสผ่าน)</td>
+              <td><code class="inline-code">p_settings: JSONB, p_category: TEXT</code></td>
+              <td><code class="inline-code">{ success: true, message: "..." }</code></td>
+              <td>Authenticated + <code class="inline-code">settings.update</code></td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-purple">RPC</span> <code class="inline-code">admin_update_smtp_password</code></td>
+              <td>บันทึกรหัสผ่าน SMTP ลง Vault (<code class="inline-code">system_secrets</code>)</td>
+              <td><code class="inline-code">p_password: TEXT</code></td>
+              <td><code class="inline-code">{ success: true, message: "..." }</code></td>
+              <td>Authenticated + <code class="inline-code">settings.update</code></td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-danger">RPC</span> <code class="inline-code">admin_get_smtp_password_internal</code></td>
+              <td>ดึงรหัสผ่าน SMTP สำหรับกระบวนการภายใน Server</td>
+              <td>None</td>
+              <td><code class="inline-code">v_secret: TEXT</code></td>
+              <td><span class="badge badge-danger">service_role ONLY</span> (Restricted)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Section 9: Database / Data Model -->
+    <section id="database-model" class="doc-section">
+      <div class="section-header">
+        <div class="section-num">9</div>
+        <h2 class="section-title">9. Database / Data Model Schema</h2>
+      </div>
+
+      <div class="doc-card">
+        <h3 class="card-title">ผังตารางฐานข้อมูล Supabase PostgreSQL (Schema Definitions)</h3>
+
+        <div class="code-block-wrapper">
+          <div class="code-block-header">11_system_settings.sql & 14_smtp_password_vault.sql</div>
+          <pre class="code-content"><code>-- 1. ตารางเก็บค่าคอนฟิกทั่วไปของระบบ
+CREATE TABLE IF NOT EXISTS public.system_settings (
+  key TEXT PRIMARY KEY,
+  value JSONB NOT NULL,
+  category TEXT NOT NULL DEFAULT 'general',
+  description TEXT,
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_by UUID REFERENCES public.profiles(id)
+);
+
+-- 2. ตารางเก็บค่าความลับ Vault (รวมรหัสผ่าน SMTP)
+CREATE TABLE IF NOT EXISTS public.system_secrets (
+  key TEXT PRIMARY KEY,
+  secret_value TEXT NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_by UUID REFERENCES public.profiles(id)
+);
+
+-- 3. ตารางประวัติ Audit Log การแก้ไขการตั้งค่า
+CREATE TABLE IF NOT EXISTS public.audit_logs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  actor_id UUID REFERENCES public.profiles(id),
+  action TEXT NOT NULL,
+  details JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 10: UI Mapping -->
+    <section id="ui-mapping" class="doc-section">
+      <div class="section-header">
+        <div class="section-num">10</div>
+        <h2 class="section-title">10. Frontend → Backend Mapping Table</h2>
+      </div>
+
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>UI Label / Field</th>
+              <th>Frontend Component State</th>
+              <th>API / RPC Function</th>
+              <th>Backend Execution File</th>
+              <th>Storage Location</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>SMTP Host</td>
+              <td><code class="inline-code">smtpForm.host</code></td>
+              <td><code class="inline-code">admin_update_system_settings</code></td>
+              <td><code class="inline-code">api/send-email.js</code> (Line 28)</td>
+              <td><code class="inline-code">system_settings.smtp_config->>host</code></td>
+            </tr>
+            <tr>
+              <td>SMTP Port</td>
+              <td><code class="inline-code">smtpForm.port</code></td>
+              <td><code class="inline-code">admin_update_system_settings</code></td>
+              <td><code class="inline-code">api/send-email.js</code> (Line 29)</td>
+              <td><code class="inline-code">system_settings.smtp_config->>port</code></td>
+            </tr>
+            <tr>
+              <td>SMTP Username</td>
+              <td><code class="inline-code">smtpForm.user</code></td>
+              <td><code class="inline-code">admin_update_system_settings</code></td>
+              <td><code class="inline-code">api/send-email.js</code> (Line 30)</td>
+              <td><code class="inline-code">system_settings.smtp_config->>user</code></td>
+            </tr>
+            <tr>
+              <td>Sender Email</td>
+              <td><code class="inline-code">smtpForm.sender_email</code></td>
+              <td><code class="inline-code">admin_update_system_settings</code></td>
+              <td><code class="inline-code">api/send-email.js</code> (Line 48)</td>
+              <td><code class="inline-code">system_settings.smtp_config->>sender_email</code></td>
+            </tr>
+            <tr>
+              <td>Sender Name</td>
+              <td><code class="inline-code">smtpForm.sender_name</code></td>
+              <td><code class="inline-code">admin_update_system_settings</code></td>
+              <td><code class="inline-code">api/send-email.js</code> (Line 32)</td>
+              <td><code class="inline-code">system_settings.smtp_config->>sender_name</code></td>
+            </tr>
+            <tr>
+              <td>SMTP Password</td>
+              <td><code class="inline-code">smtpForm.new_password</code></td>
+              <td><code class="inline-code">admin_update_smtp_password</code></td>
+              <td><code class="inline-code">api/send-email.js</code> (Line 31)</td>
+              <td><code class="inline-code">system_secrets</code> (Key: <code class="inline-code">smtp_password</code>)</td>
+            </tr>
+            <tr>
+              <td>Security Protocol</td>
+              <td><code class="inline-code">smtpForm.secure</code></td>
+              <td><code class="inline-code">admin_update_system_settings</code></td>
+              <td><code class="inline-code">api/send-email.js</code> (Line 37)</td>
+              <td><code class="inline-code">system_settings.smtp_config->>secure</code></td>
+            </tr>
+            <tr>
+              <td>Verify TLS Certificate</td>
+              <td><code class="inline-code">smtpForm.reject_unauthorized</code></td>
+              <td><code class="inline-code">admin_update_system_settings</code></td>
+              <td><code class="inline-code">api/send-email.js</code> (Line 43)</td>
+              <td><code class="inline-code">system_settings.smtp_config->>reject_unauthorized</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Section 11: Code Reference -->
+    <section id="code-reference" class="doc-section">
+      <div class="section-header">
+        <div class="section-num">11</div>
+        <h2 class="section-title">11. Source Code Reference</h2>
+      </div>
+
+      <div class="doc-card">
+        <h3 class="card-title">ตัวอย่างโค้ดสำคัญ (Selected Code Snippets)</h3>
+
+        <div class="code-block-wrapper">
+          <div class="code-block-header">api/send-email.js (Lines 34-45: Nodemailer Transporter)</div>
+          <pre class="code-content"><code>const transporter = nodemailer.createTransport({
+  host,
+  port,
+  secure: port === 465,
+  auth: {
+    user,
+    pass,
+  },
+  tls: {
+    rejectUnauthorized: false
+  }
+});</code></pre>
+        </div>
+
+        <div class="code-block-wrapper">
+          <div class="code-block-header">src/lib/emailService.js (Lines 33-51: Fallback Logic)</div>
+          <pre class="code-content"><code>// Fallback to Supabase Native Auth if Vercel endpoint is un-deployed or offline
+const prodOrigin = typeof window !== 'undefined' && !window.location.origin.includes('localhost')
+  ? window.location.origin
+  : (import.meta.env.VITE_APP_URL || 'https://stock-flow-two-psi.vercel.app');
+const redirectUri = actionUrl || `${prodOrigin}/login`;
+
+const { error: authErr } = await supabase.auth.resetPasswordForEmail(to, {
+  redirectTo: redirectUri,
+});</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 12: Implementation Status -->
+    <section id="status-classification" class="doc-section">
+      <div class="section-header">
+        <div class="section-num">12</div>
+        <h2 class="section-title">12. Current Implementation Status Classification</h2>
+      </div>
+
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Feature Component</th>
+              <th>Status Badge</th>
+              <th>Analysis Summary</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>SMTP Form Management</td>
+              <td><span class="badge badge-success">Implemented</span></td>
+              <td>ครบถ้วนทุกฟิลด์ พร้อมระบบคำนวณโหมดโปรโตคอลอัตโนมัติ</td>
+            </tr>
+            <tr>
+              <td>Password Vault Security</td>
+              <td><span class="badge badge-success">Implemented</span></td>
+              <td>ใช้งานผ่าน RPC และแยกตารางเก็บข้อมูลความลับออกจาก Frontend</td>
+            </tr>
+            <tr>
+              <td>Test Email Sending</td>
+              <td><span class="badge badge-success">Implemented</span></td>
+              <td>ส่งผ่าน Overrides แบบเรียลไทม์ได้โดยไม่ต้องบันทึกข้อมูลก่อน</td>
+            </tr>
+            <tr>
+              <td>TLS Certificate Toggle Enforcement</td>
+              <td><span class="badge badge-warning">Partially Implemented</span></td>
+              <td>UI มีปุ่มสวิตช์ แต่ Backend API ยังคงฮาร์ดโค้ดเป็น false</td>
+            </tr>
+            <tr>
+              <td>Automatic Email Retry Queue</td>
+              <td><span class="badge badge-danger">Not Implemented</span></td>
+              <td>ยังไม่มีระบบคิว (Background Queue / Worker) สำหรับลองส่งใหม่เมื่อล้มเหลว</td>
+            </tr>
+            <tr>
+              <td>Email Delivery History Tracking</td>
+              <td><span class="badge badge-danger">Not Implemented</span></td>
+              <td>ยังไม่มีตารางบันทึกประวัติสถานะการส่งอีเมลแต่ละฉบับลงตารางในฐานข้อมูล</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Section 13: Known Issues -->
+    <section id="known-issues" class="doc-section">
+      <div class="section-header">
+        <div class="section-num">13</div>
+        <h2 class="section-title">13. Known Issues & Security Audit Audit</h2>
+      </div>
+
+      <div class="doc-card">
+        <div class="alert-box alert-danger">
+          <div class="alert-icon">🚫</div>
+          <div>
+            <strong>1. Discrepancy in TLS Certificate Validation:</strong><br>
+            ใน UI <code class="inline-code">src/pages/Settings.jsx</code> มี Checkbox ให้ผู้ใช้เลือกเปิด/ปิดการตรวจใบรับรอง (<code class="inline-code">reject_unauthorized</code>) แต่ในไฟล์ <code class="inline-code">api/send-email.js</code> กลับเขียนค่าคงที่เป็น <code class="inline-code">tls: { rejectUnauthorized: false }</code> ส่งผลให้การตั้งค่าจากหน้าจอไม่มีผลต่อการเชื่อมต่อจริงใน Backend
+          </div>
+        </div>
+
+        <div class="alert-box alert-warning">
+          <div class="alert-icon">⚠️</div>
+          <div>
+            <strong>2. Plaintext Hardcoded Password Fallback in API Code:</strong><br>
+            ในไฟล์ <code class="inline-code">api/send-email.js</code> บรรทัดที่ 31 มีการใส่รหัสผ่านแอป (App Password) แบบ plain-text สำรองไว้ในซอร์สโค้ด ซึ่งเสี่ยงต่อการหลุดของข้อมูลหาก Repo ถูกเข้าถึง
+          </div>
+        </div>
+
+        <div class="alert-box alert-info">
+          <div class="alert-icon">ℹ️</div>
+          <div>
+            <strong>3. Open CORS Wildcard on API Route:</strong><br>
+            เส้นทาง <code class="inline-code">/api/send-email</code> กำหนดค่า <code class="inline-code">Access-Control-Allow-Origin: '*'</code> และไม่บังคับส่ง Auth Token ซึ่งอาจถูกผู้อื่นส่ง HTTP Request เพื่อใช้เซิร์ฟเวอร์ SMTP ยิงอีเมลสแปมได้
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 14: Technical Architecture -->
+    <section id="architecture" class="doc-section">
+      <div class="section-header">
+        <div class="section-num">14</div>
+        <h2 class="section-title">14. Technical Architecture Diagram</h2>
+      </div>
+
+      <div class="mermaid-wrapper">
+        <pre class="mermaid">
+graph TD
+    subgraph Client_Layer ["Client Layer (React UI)"]
+        UI["Settings Page (src/pages/Settings.jsx)"]
+        Modal["Test Email Modal"]
+        Service["emailService.js (sendStockFlowEmail)"]
+    end
+
+    subgraph Database_Layer ["Supabase PostgreSQL Vault"]
+        RPC_Set["admin_update_system_settings()"]
+        RPC_Vault["admin_update_smtp_password()"]
+        Table_Settings[("public.system_settings")]
+        Table_Secrets[("public.system_secrets (Vault)")]
+    end
+
+    subgraph Transport_Layer ["Serverless Transport (Vercel)"]
+        API["api/send-email.js (Node.js Handler)"]
+        NodeMailer["Nodemailer Transporter"]
+    end
+
+    subgraph External_Layer ["External Mail Infrastructure"]
+        SMTP_Server["SMTP Server (e.g. Gmail / Exchange)"]
+        Recipient["Recipient Email Inbox"]
+    end
+
+    UI -->|"Save Settings"| RPC_Set
+    UI -->|"Save Password"| RPC_Vault
+    RPC_Set --> Table_Settings
+    RPC_Vault --> Table_Secrets
+
+    UI -->|"Click Test Email"| Modal
+    Modal -->|"Execute sendTestEmail()"| Service
+    Service -->|"HTTP POST (with Overrides)"| API
+    
+    API --> NodeMailer
+    NodeMailer -->|"Implicit TLS / STARTTLS"| SMTP_Server
+    SMTP_Server -->|"Deliver Email"| Recipient
+
+    Service -.->|"Fallback if API offline"| Supabase_Auth["Supabase Native Auth"]
+        </pre>
+      </div>
+    </section>
+
+    <!-- Section 15: Conclusion & Next Steps -->
+    <section id="conclusion" class="doc-section">
+      <div class="section-header">
+        <div class="section-num">15</div>
+        <h2 class="section-title">15. Conclusion & Recommendations</h2>
+      </div>
+
+      <div class="doc-card">
+        <h3 class="card-title" style="color: var(--accent-emerald);">ข้อเสนอแนะในการปรับปรุง (Actionable Recommendations)</h3>
+        
+        <ol style="font-size: 0.85rem; color: var(--text-muted); padding-left: 1.2rem; line-height: 1.8;">
+          <li><strong>เชื่อมโยงตัวเลือก TLS Certificate Verification:</strong> ปรับปรุงไฟล์ <code class="inline-code">api/send-email.js</code> ให้รับค่า <code class="inline-code">smtpOverrides.reject_unauthorized</code> หรืออ่านจากระบบการตั้งค่า เพื่อให้สวิตช์ใน UI มีผลทำงานจริง</li>
+          <li><strong>ลบรหัสผ่าน Plaintext Fallback ออกจากซอร์สโค้ด:</strong> ลบสตริงรหัสผ่านสำรองในบรรทัด 31 ของ <code class="inline-code">api/send-email.js</code> และเปลี่ยนไปใช้การอ่านจาก Environment Variable หรือ Supabase Vault ผ่าน Service Role RPC เท่านั้น</li>
+          <li><strong>เพิ่มการยึดสิทธิ์ API Route (Protect API Route):</strong> เพิ่มการตรวจสอบ Supabase Authorization Header หรือ Secret Key ระหว่าง Client และ Vercel Endpoint เพื่อป้องกันการเรียกใช้งาน <code class="inline-code">/api/send-email</code> จากภายนอก</li>
+          <li><strong>สร้างตารางประวัติการส่งอีเมล (Email Audit Log):</strong> เพิ่มตารางสำหรับจัดเก็บประวัติการส่งข้อความแจ้งเตือน (Status, Recipient, Sent At, Error Log) เพื่อการตรวจสอบย้อนหลัง</li>
+        </ol>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      securityLevel: 'loose',
+      themeVariables: {
+        fontFamily: 'Plus Jakarta Sans, Noto Sans Thai, sans-serif',
+        primaryColor: '#1e293b',
+        primaryTextColor: '#f8fafc',
+        primaryBorderColor: '#3b82f6',
+        lineColor: '#64748b',
+        secondaryColor: '#0f172a',
+        tertiaryColor: '#111827'
+      }
+    });
+  </script>
+</body>
+</html>

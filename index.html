@@ -1,0 +1,162 @@
+﻿<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>แดชบอร์ดวาระคงเหลือ — ผู้ใหญ่บ้าน / กำนัน</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-icon">📋</div>
+        <div>
+          <h1>แดชบอร์ดวาระคงเหลือ</h1>
+          <p>ผู้ใหญ่บ้าน / กำนัน / ผู้ช่วยฯ — วันคงเหลือคำนวณจากวันที่สิ้นสุดวาระแบบเรียลไทม์</p>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="clock">
+          <div id="clockNow">--:--:--</div>
+          <div id="clockDate" class="clock-date">—</div>
+        </div>
+        <span class="tz-chip">Asia/Bangkok (UTC+7)</span>
+        <button
+          id="notifAdminTopbarBtn"
+          class="topbar-action"
+          type="button"
+          aria-expanded="false"
+          aria-controls="notificationAdminPanel"
+          title="เปิดการตั้งค่าการแจ้งเตือน"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 15.25A3.25 3.25 0 1 0 12 8.75a3.25 3.25 0 0 0 0 6.5Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M19.4 15a1 1 0 0 0 .2 1.1l.1.1a1.2 1.2 0 0 1 0 1.7l-1.2 1.2a1.2 1.2 0 0 1-1.7 0l-.1-.1a1 1 0 0 0-1.1-.2 1 1 0 0 0-.6.9V20a1.2 1.2 0 0 1-1.2 1.2h-1.7A1.2 1.2 0 0 1 10.9 20v-.2a1 1 0 0 0-.6-.9 1 1 0 0 0-1.1.2l-.1.1a1.2 1.2 0 0 1-1.7 0l-1.2-1.2a1.2 1.2 0 0 1 0-1.7l.1-.1a1 1 0 0 0 .2-1.1 1 1 0 0 0-.9-.6H4A1.2 1.2 0 0 1 2.8 13v-2A1.2 1.2 0 0 1 4 9.8h.2a1 1 0 0 0 .9-.6 1 1 0 0 0-.2-1.1l-.1-.1a1.2 1.2 0 0 1 0-1.7l1.2-1.2a1.2 1.2 0 0 1 1.7 0l.1.1a1 1 0 0 0 1.1.2 1 1 0 0 0 .6-.9V4A1.2 1.2 0 0 1 10.7 2.8h1.7A1.2 1.2 0 0 1 13.6 4v.2a1 1 0 0 0 .6.9 1 1 0 0 0 1.1-.2l.1-.1a1.2 1.2 0 0 1 1.7 0l1.2 1.2a1.2 1.2 0 0 1 0 1.7l-.1.1a1 1 0 0 0-.2 1.1 1 1 0 0 0 .9.6h.2A1.2 1.2 0 0 1 21.2 11v2a1.2 1.2 0 0 1-1.2 1.2h-.2a1 1 0 0 0-.9.8Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>ตั้งค่าอีเมล</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div id="notificationAdminBackdrop" class="admin-drawer-backdrop" aria-hidden="true"></div>
+  <aside id="notificationAdminPanel" class="admin-drawer" aria-hidden="true" aria-labelledby="notificationAdminTitle">
+    <div class="admin-drawer-header">
+      <div class="admin-drawer-heading">
+        <p class="admin-drawer-eyebrow">การควบคุมการแจ้งเตือน</p>
+        <h2 id="notificationAdminTitle">การตั้งค่าการแจ้งเตือนและอีเมล</h2>
+      </div>
+      <button type="button" id="notificationAdminCloseBtn" class="admin-drawer-close" aria-label="ปิดการตั้งค่าการแจ้งเตือน" title="ปิด">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+    <div id="notificationAdminPanelBody" class="admin-drawer-body"></div>
+  </aside>
+
+  <div id="error" class="error hidden"></div>
+
+  <main class="container">
+
+    <section id="kpis" class="kpis" aria-label="ภาพรวม"></section>
+
+    <section class="panel controls">
+      <div class="search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="searchInput" type="search" placeholder="ค้นหา ชื่อ / ตำแหน่ง / หมู่บ้าน / ตำบล / อำเภอ / จังหวัด / เบอร์โทร / หมายเหตุ..." autocomplete="off" aria-label="ค้นหา">
+      </div>
+      <div id="chips" class="chips" aria-label="กรองตามสถานะ"></div>
+      <div class="controls-right">
+        <label class="sort-label">เรียง:
+          <select id="sortSelect" aria-label="เรียงลำดับ">
+            <option value="daysAsc">วันคงเหลือ น้อย → มาก</option>
+            <option value="daysDesc">วันคงเหลือ มาก → น้อย</option>
+            <option value="name">ชื่อ (ก–ฮ)</option>
+            <option value="endDate">วันที่สิ้นสุดวาระ</option>
+            <option value="province">จังหวัด</option>
+          </select>
+        </label>
+        <button id="refreshBtn" class="btn" title="คำนวณวันคงเหลือใหม่จากเวลาปัจจุบัน">↻ รีเฟรช</button>
+        <button id="settingsBtn" class="btn" title="ปรับเกณฑ์และวันที่อ้างอิง">⚙ ตั้งค่า</button>
+      </div>
+    </section>
+
+    <section id="settingsPanel" class="panel settings hidden">
+      <h3>การตั้งค่า</h3>
+      <div class="settings-grid">
+        <label>เกณฑ์ "ใกล้หมดวาระ" (วัน)
+          <input id="thresholdInput" type="number" min="0" max="3650" step="1" aria-label="เกณฑ์ใกล้หมดวาระ">
+        </label>
+        <label>วันที่อ้างอิงข้อมูล (วันที่วัด "วาระคงเหลือ")
+          <input id="referenceInput" type="date" aria-label="วันที่อ้างอิงข้อมูล">
+        </label>
+        <button id="resetSettingsBtn" class="btn">รีเซ็ตเป็นค่าเริ่มต้น</button>
+        <div class="settings-note">
+          วันที่สิ้นสุดวาระ = วันที่อ้างอิง + วาระคงเหลือ (เช่น "5 ปี 1 เดือน") ค่าที่แก้จะถูกบันทึกในเบราว์เซอร์นี้
+          และมีผลเหนือค่าที่กำหนดใน <code>js/config.js</code> โดยไม่แก้ไฟล์ข้อมูลต้นฉบับ
+        </div>
+      </div>
+    </section>
+
+    <section class="panel notif-panel">
+      <div class="table-head">
+        <h2>การแจ้งเตือนวาระ (อีเมล)</h2>
+        <span class="muted">แจ้งเตือนอัตโนมัติ 6 เดือน / 1 เดือน / สรุปประจำปี — อัปเดตทุกนาที</span>
+      </div>
+      <div id="notifBody"></div>
+    </section>
+
+    <section class="panel table-panel">
+      <div class="table-head">
+        <h2>รายชื่อและวันคงเหลือ</h2>
+        <span id="countInfo"></span>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th data-sort="daysAsc">ลำดับ</th>
+              <th data-sort="name">ชื่อ</th>
+              <th>ตำแหน่ง</th>
+              <th>พื้นที่</th>
+              <th title="ไม่มีข้อมูลวันที่เริ่มวาระในชุดข้อมูลต้นทาง">วันที่เริ่มวาระ</th>
+              <th data-sort="endDate">วันที่สิ้นสุดวาระ</th>
+              <th>วาระคงเหลือ (ข้อมูลเดิม)</th>
+              <th data-sort="daysAsc">วันคงเหลือ</th>
+              <th>สถานะ</th>
+              <th>หมายเหตุ</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="legend panel">
+      <h3>วิธีอ่านแดชบอร์ด</h3>
+      <ul>
+        <li><span class="swatch" style="background:#16a34a"></span><b>ดำรงวาระ</b> — วันคงเหลือ &gt; เกณฑ์
+          <span class="swatch" style="background:#d97706"></span><b>ใกล้หมดวาระ</b> — 0 ≤ วันคงเหลือ ≤ เกณฑ์ (รวมถึงวันสิ้นสุดพอดี เรียกว่า "หมดวาระวันนี้")
+          <span class="swatch" style="background:#dc2626"></span><b>หมดวาระแล้ว</b> — วันคงเหลือ &lt; 0
+          <span class="swatch" style="background:#64748b"></span><b>ข้อมูลไม่สมบูรณ์</b> — วาระหรือวันที่ไม่ถูกต้อง/ขาดหาย</li>
+        <li><b>วันคงเหลือ</b> คำนวณสดทุกครั้งจากเวลาปัจจุบัน: <code>วันคงเหลือ = วันที่สิ้นสุดวาระ − วันนี้</code> (โซนเวลา Asia/Bangkok) และคำนวณใหม่ให้อัตโนมัติเมื่อวันที่เปลี่ยน (เที่ยงคืนตามเวลาไทย)</li>
+        <li><b>วันที่สิ้นสุดวาระ</b> ได้จากข้อมูล "วาระคงเหลือ" (เช่น "5 ปี 1 เดือน") บวกกับ <b>วันที่อ้างอิงข้อมูล</b> — แก้ได้ใน "⚙ ตั้งค่า"</li>
+        <li>ข้อมูลอ้างอิง ณ วันที่ <b id="metaRef">—</b> • เกณฑ์ใกล้หมดวาระ ≤ <b id="metaThreshold">—</b> วัน • อัปเดตล่าสุด <b id="metaUpdated">—</b> น. • จำนวน <b id="metaCount">—</b> ราย</li>
+      </ul>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <p>แหล่งข้อมูล: ไฟล์ "วาระ ผญบ - วาระ.csv" (ต้นฉบับไม่ถูกแก้ไข — แดชบอร์ดอ่านจากสำเนา UTF-8 ที่ <code>data/vara_utf8.csv</code>)</p>
+    <p>คอลัมน์ "วันที่เริ่มวาระ" ไม่มีอยู่ในชุดข้อมูลต้นทาง จึงแสดงเป็น "—" อย่างตรงไปตรงมา ไม่มีการคาดเดา</p>
+  </footer>
+
+  <script type="module" src="js/dashboard.js"></script>
+  <script type="module" src="js/notifications.js"></script>
+</body>
+</html>
+

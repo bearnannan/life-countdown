@@ -1,0 +1,17 @@
+{
+  "name": "wara-dashboard",
+  "version": "1.0.0",
+  "description": "แดชบอร์ดวาระคงเหลือ — คำนวณวันคงเหลือแบบเรียลไทม์จากวันที่สิ้นสุดวาระ (โซนเวลา Asia/Bangkok)",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test",
+    "convert:csv": "node scripts/convert-csv.mjs",
+    "notify": "node server/scheduler.js",
+    "notify:once": "node server/scheduler.js"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "license": "MIT"
+}

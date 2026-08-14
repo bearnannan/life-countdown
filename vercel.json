@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "functions": {
+    "api/**/*.js": {
+      "maxDuration": 300
+    },
+    "server.js": {
+      "includeFiles": "{css,js,data}/**"
+    }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/notifications",
+      "schedule": "0 1 * * *"
+    }
+  ]
+}
