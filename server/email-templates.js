@@ -287,19 +287,23 @@ export function renderOneMonth(p, opts = {}) {
 export function renderAnnual(summary, opts = {}) {
   const dashboardUrl = publicActionUrl(opts.dashboardUrl);
   const cfg = opts.customConfig || {};
+  const totalPersonnel = summary.total !== undefined ? summary.total : (summary.counts?.total ?? 0);
+  const counts = summary.counts || {};
+  const expiringList = summary.expiringList || [];
+
   const dataDict = {
-    year: String(summary.year),
+    year: String(summary.year || new Date().getFullYear()),
     person_name: '',
     position: '',
     term_start_date: '',
     term_end_date: '',
     days_remaining: '',
     status: 'สรุปประจำปี',
-    total_count: String(summary.total),
-    six_month_count: String(summary.counts.expiring6),
-    one_month_count: String(summary.counts.expiring1),
-    expired_count: String(summary.counts.expired),
-    incomplete_count: String(summary.counts.incomplete || 0),
+    total_count: String(totalPersonnel),
+    six_month_count: String(counts.expiring6 ?? 0),
+    one_month_count: String(counts.expiring1 ?? 0),
+    expired_count: String(counts.expired ?? 0),
+    incomplete_count: String(counts.incomplete ?? 0),
     action_url: dashboardUrl,
     notification_type: 'สรุปการหมดวาระประจำปี',
   };
@@ -307,7 +311,7 @@ export function renderAnnual(summary, opts = {}) {
   const customSubject = cfg.subject ? interpolateTemplate(cfg.subject, dataDict) : null;
   const customBody = cfg.templateHtml ? interpolateTemplate(cfg.templateHtml, dataDict, { escapeValues: true }) : null;
 
-  const rows = summary.expiringList.map((p, i) => `
+  const rows = expiringList.map((p, i) => `
     <tr>
       <td style="padding:8px 10px;border-bottom:1px solid ${BRAND.border};font-size:13px;${i % 2 ? 'background-color:#fafbfc;' : ''}">${esc(p.name)}</td>
       <td style="padding:8px 10px;border-bottom:1px solid ${BRAND.border};font-size:13px;">${esc(p.positionLabel)}</td>
@@ -326,15 +330,15 @@ export function renderAnnual(summary, opts = {}) {
       สรุปสถานะวาระการดำรงตำแหน่งประจำปี <b>${summary.year}</b> (ณ วันที่ 31 ธันวาคม)
     </p>
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-bottom:20px;">
-      ${stat('จำนวนบุคลากรทั้งหมด (Total Personnel)', summary.total)}
-      ${stat('ผู้ใหญ่บ้าน (Village Headmen)', summary.counts.village)}
-      ${stat('กำนัน (Subdistrict Headmen)', summary.counts.kamnan)}
-      ${stat('ผู้ช่วยผู้ใหญ่บ้าน (Assistant Village Headmen)', summary.counts.assistant)}
-      ${stat('วาระที่จะหมดภายใน 6 เดือน (Expiring Within 6 Months)', summary.counts.expiring6, BRAND.amber)}
-      ${stat('วาระที่จะหมดภายใน 1 เดือน (Expiring Within 1 Month)', summary.counts.expiring1, BRAND.red)}
-      ${stat('วาระที่หมดแล้ว (Already Expired)', summary.counts.expired, BRAND.red)}
-      ${stat('ข้อมูลไม่สมบูรณ์ (Incomplete Data)', summary.counts.incomplete || 0, BRAND.slate)}
-      ${stat('วาระที่ยังดำรงอยู่ (Active)', summary.counts.active, BRAND.green)}
+      ${stat('จำนวนบุคลากรทั้งหมด (Total Personnel)', totalPersonnel)}
+      ${stat('ผู้ใหญ่บ้าน (Village Headmen)', counts.village ?? 0)}
+      ${stat('กำนัน (Subdistrict Headmen)', counts.kamnan ?? 0)}
+      ${stat('ผู้ช่วยผู้ใหญ่บ้าน (Assistant Village Headmen)', counts.assistant ?? 0)}
+      ${stat('วาระที่จะหมดภายใน 6 เดือน (Expiring Within 6 Months)', counts.expiring6 ?? 0, BRAND.amber)}
+      ${stat('วาระที่จะหมดภายใน 1 เดือน (Expiring Within 1 Month)', counts.expiring1 ?? 0, BRAND.red)}
+      ${stat('วาระที่หมดแล้ว (Already Expired)', counts.expired ?? 0, BRAND.red)}
+      ${stat('ข้อมูลไม่สมบูรณ์ (Incomplete Data)', counts.incomplete ?? 0, BRAND.slate)}
+      ${stat('วาระที่ยังดำรงอยู่ (Active)', counts.active ?? 0, BRAND.green)}
     </table>
     <p style="font-size:14px;font-weight:bold;color:#0f172a;margin:0 0 8px;">รายชื่อผู้ที่มีวาระใกล้หมดอายุ</p>
     ${rows ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border:1px solid ${BRAND.border};">
