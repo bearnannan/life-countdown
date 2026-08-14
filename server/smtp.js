@@ -295,7 +295,7 @@ export async function sendMail(opts) {
     const boundary = `----_=${Date.now()}_${Math.random().toString(16).slice(2)}`;
     const safeText = text || stripHtml(html || '');
     const safeHtml = html || `<pre>${safeText}</pre>`;
-    const body = [
+    const headerLines = [
       `Date: ${new Date().toUTCString()}`,
       `From: ${encodeAddressHeader(from)}`,
       `To: ${to.join(', ')}`,
@@ -306,7 +306,9 @@ export async function sendMail(opts) {
       'Content-Language: th',
       'MIME-Version: 1.0',
       'Content-Type: multipart/alternative; boundary="' + boundary + '"',
-      '',
+    ].filter(Boolean);
+
+    const bodyParts = [
       '--' + boundary,
       'Content-Type: text/plain; charset=UTF-8',
       'Content-Transfer-Encoding: base64',
@@ -320,10 +322,14 @@ export async function sendMail(opts) {
       toMimeBase64(safeHtml),
       '',
       '--' + boundary + '--',
-      '.',
-    ].filter((l) => l !== null).join(CRLF);
+    ];
 
-    res = await cmd(body);
+    const rawMessage = [...headerLines, '', ...bodyParts].join(CRLF);
+    // RFC 5321 section 4.5.2: Dot-stuffing (ความโปร่งใสของข้อมูล)
+    const dotStuffed = rawMessage.replace(/^\./gm, '..');
+    const finalData = dotStuffed + CRLF + '.';
+
+    res = await cmd(finalData);
     if (!res.ok) throw new SmtpError(`เซิร์ฟเวอร์ปฏิเสธอีเมล (${res.code}): ${res.message}`, { code: 'REJECTED' });
     const messageId = (res.message.match(/<([^<>]+)>/) || [null, null])[1];
 
