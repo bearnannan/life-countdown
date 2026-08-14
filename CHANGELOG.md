@@ -1,3 +1,9 @@
+## [2026-08-14 16:35]
+- **Files Modified:** `server/email-templates.js`, `CHANGELOG.md`
+- **Changes:**
+  - `server/email-templates.js`: ยกระดับดีไซน์อีเมลทั้ง 3 ชุด (6 เดือน, 1 เดือน, สรุปประจำปี 31 ธ.ค.) ด้วยหลักการ UI/UX Pro Max ได้แก่ ตารางข้อมูลระดับผู้บริหาร (Executive Table), กล่องแนะนำขั้นตอนการดำเนินการทางธุรการ (Administrative Guidance), โทนสีมหาดไทย/ทางการ (#15803d) พร้อม Contrast ratio > 4.5:1 (WCAG 2.2 AA), ฟอนต์ระบบราชการ 'Sarabun', และรองรับ Microsoft 365 / Outlook / Gmail 100%
+- **Reason:** ปรับปรุงภาพลักษณ์และความชัดเจนในการสื่อสารข้อมูลทางราชการ พร้อมรักษาความเข้ากันได้ของระบบตรวจจับความปลอดภัยของ Microsoft 365
+
 ## [2026-08-14 15:45]
 - **Files Modified:** `server/email-templates.js`, `server/settings.js`, `CHANGELOG.md`
 - **Changes:**
