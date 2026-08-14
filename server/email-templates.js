@@ -91,32 +91,25 @@ function layout(title, bodyHtml) {
 </html>`;
 }
 
-/** การ์ดข้อมูลบุคคลที่ใช้ร่วมกันในเทมเพลตแจ้งเตือนรายบุคคล */
-function personCard(p, tone) {
-  const color = tone === 'red' ? BRAND.red : BRAND.amber;
-  const badgeText = p.daysLeft < 0 ? 'หมดวาระแล้ว' : p.daysLeft === 0 ? 'หมดวาระวันนี้' : `เหลือ ${p.daysLeft} วัน`;
+/** ตารางข้อมูลบุคคลแบบรายงาน (ผ่านการตรวจสอบความเข้ากันได้ของ Group Mailbox) */
+function personTable(t, tone) {
+  const highlightColor = tone === 'red' ? BRAND.red : BRAND.amber;
+  const areaPart = t.areaLabel ? ` (${esc(t.areaLabel)})` : '';
   return `
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid ${BRAND.border};border-left:4px solid ${color};border-radius:6px;margin-bottom:16px;">
-    <tr><td style="padding:16px 20px;">
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-        <tr>
-          <td style="font-size:17px;font-weight:bold;color:#0f172a;">${esc(p.name)}</td>
-          <td align="right"><span style="display:inline-block;background-color:${color};color:#ffffff;font-size:12px;font-weight:bold;padding:4px 10px;border-radius:12px;">${esc(badgeText)}</span></td>
-        </tr>
-        <tr><td colspan="2" style="font-size:13px;color:${BRAND.slate};padding-top:2px;">${esc(p.positionLabel)} · ${esc(p.areaLabel || '')}</td></tr>
-      </table>
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:12px;font-size:13px;color:#334155;">
-        <tr>
-          <td style="padding:4px 0;width:50%;">วันเริ่มวาระ: <b>${esc(p.startDateThai)}</b></td>
-          <td style="padding:4px 0;width:50%;">วันสิ้นสุดวาระ: <b>${esc(p.endDateThai)}</b></td>
-        </tr>
-        <tr>
-          <td style="padding:4px 0;">วันคงเหลือ: <b>${esc(p.daysLeftText)}</b></td>
-          <td style="padding:4px 0;">สถานะ: <b>${esc(p.statusText)}</b></td>
-        </tr>
-      </table>
-    </td></tr>
-  </table>`;
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border:1px solid ${BRAND.border};margin-bottom:20px;">
+      <tr style="background-color:${BRAND.green};">
+        <th style="padding:8px 10px;color:#ffffff;font-size:13px;text-align:left;">ชื่อ</th>
+        <th style="padding:8px 10px;color:#ffffff;font-size:13px;text-align:left;">ตำแหน่ง</th>
+        <th style="padding:8px 10px;color:#ffffff;font-size:13px;text-align:left;">วันสิ้นสุดวาระ</th>
+        <th style="padding:8px 10px;color:#ffffff;font-size:13px;text-align:right;">วันคงเหลือ</th>
+      </tr>
+      <tr>
+        <td style="padding:8px 10px;border-bottom:1px solid ${BRAND.border};font-size:13px;font-weight:bold;color:#0f172a;">${esc(t.name)}</td>
+        <td style="padding:8px 10px;border-bottom:1px solid ${BRAND.border};font-size:13px;color:#334155;">${esc(t.positionLabel)}${areaPart}</td>
+        <td style="padding:8px 10px;border-bottom:1px solid ${BRAND.border};font-size:13px;color:#334155;">${esc(t.endDateThai)}</td>
+        <td style="padding:8px 10px;border-bottom:1px solid ${BRAND.border};font-size:13px;text-align:right;color:${highlightColor};font-weight:bold;">${esc(t.daysLeftText)}</td>
+      </tr>
+    </table>`;
 }
 
 /** แปลงข้อมูลบุคคล → ฟิลด์ที่เทมเพลตใช้ */
@@ -186,7 +179,7 @@ export function validateRenderedEmail(rendered = {}) {
       errors.push(`${name} is not valid UTF-8`);
     }
   }
-  if (/�|��/.test(combined)) errors.push('replacement characters detected');
+  if (/\uFFFD/.test(combined)) errors.push('replacement characters detected');
 
   const missingVars = [...new Set(combined.match(/\{\{\s*[a-zA-Z0-9_]+\s*\}\}/g) || [])];
   if (missingVars.length) errors.push(`unresolved template variables: ${missingVars.join(', ')}`);
@@ -207,26 +200,23 @@ export function validateRenderedEmail(rendered = {}) {
   return { ok: errors.length === 0, errors };
 }
 
-/** 1) เตือน 6 เดือนก่อนหมดวาระ */
+/** 1) ข้อมูลวาระ 6 เดือนก่อนหมดวาระ */
 export function renderSixMonth(p, opts = {}) {
   const dashboardUrl = publicActionUrl(opts.dashboardUrl);
-  const t = templatePerson({ ...p, notification_type: 'แจ้งเตือนใกล้หมดวาระ 6 เดือน', dashboardUrl });
+  const t = templatePerson({ ...p, notification_type: 'รายงานวาระการดำรงตำแหน่ง 6 เดือน', dashboardUrl });
   const cfg = opts.customConfig || {};
   
   const customSubject = cfg.subject ? interpolateTemplate(cfg.subject, t) : null;
   const customBody = cfg.templateHtml ? interpolateTemplate(cfg.templateHtml, t, { escapeValues: true }) : null;
 
   const defaultBody = `
-    <p style="font-size:14px;color:#334155;margin:0 0 4px;">เรียน ท่านผู้เกี่ยวข้อง</p>
     <p style="font-size:14px;color:#334155;margin:0 0 16px;">
-      วาระการดำรงตำแหน่งของ <b>${esc(t.name)}</b> (${esc(t.positionLabel)})
-      กำลังจะหมดอายุในอีกประมาณ <b style="color:${BRAND.amber};">6 เดือน</b>
-      โปรดตรวจสอบข้อมูลและวางแผนการดำเนินการตามขั้นตอนที่เกี่ยวข้อง
+      ข้อมูลวาระการดำรงตำแหน่ง: <b>${esc(t.name)}</b> (${esc(t.positionLabel)})
     </p>
-    ${personCard(t, 'amber')}`;
+    ${personTable(t, 'amber')}`;
   
   const defaultText = [
-    `ข้อมูลวาระคงเหลือ: ประมาณ 6 เดือน`,
+    `รายงานข้อมูลวาระการดำรงตำแหน่ง: ${t.name}`,
     ``,
     `ชื่อ: ${t.name}`,
     `ตำแหน่ง: ${t.positionLabel}`,
@@ -239,32 +229,29 @@ export function renderSixMonth(p, opts = {}) {
   ].filter(Boolean).join('\n');
 
   return {
-    subject: customSubject || `ข้อมูลวาระคงเหลือ 6 เดือน: ${t.name} (${t.endDateThai})`,
-    html: customBody || layout(`เตือนวาระ 6 เดือน — ${t.name}`, defaultBody),
+    subject: customSubject || `รายงานวาระการดำรงตำแหน่ง ${t.year}: ${t.name}`,
+    html: customBody || layout(`รายงานวาระการดำรงตำแหน่ง — ${t.name}`, defaultBody),
     text: cfg.templateText ? interpolateTemplate(cfg.templateText, t) : defaultText,
   };
 }
 
-/** 2) เตือน 1 เดือนก่อนหมดวาระ */
+/** 2) ข้อมูลวาระ 1 เดือนก่อนหมดวาระ */
 export function renderOneMonth(p, opts = {}) {
   const dashboardUrl = publicActionUrl(opts.dashboardUrl);
-  const t = templatePerson({ ...p, notification_type: 'แจ้งเตือนใกล้หมดวาระ 1 เดือน', dashboardUrl });
+  const t = templatePerson({ ...p, notification_type: 'รายงานวาระการดำรงตำแหน่ง 1 เดือน', dashboardUrl });
   const cfg = opts.customConfig || {};
 
   const customSubject = cfg.subject ? interpolateTemplate(cfg.subject, t) : null;
   const customBody = cfg.templateHtml ? interpolateTemplate(cfg.templateHtml, t, { escapeValues: true }) : null;
 
   const defaultBody = `
-    <p style="font-size:14px;color:#334155;margin:0 0 4px;">เรียน ท่านผู้เกี่ยวข้อง</p>
     <p style="font-size:14px;color:#334155;margin:0 0 16px;">
-      วาระการดำรงตำแหน่งของ <b>${esc(t.name)}</b> (${esc(t.positionLabel)})
-      กำลังจะหมดอายุในอีกประมาณ <b style="color:${BRAND.red};">1 เดือน</b>
-      โปรดตรวจสอบข้อมูลและวางแผนการดำเนินการตามขั้นตอนที่เกี่ยวข้อง
+      ข้อมูลวาระการดำรงตำแหน่ง: <b>${esc(t.name)}</b> (${esc(t.positionLabel)})
     </p>
-    ${personCard(t, 'red')}`;
+    ${personTable(t, 'red')}`;
   
   const defaultText = [
-    `ข้อมูลวาระคงเหลือ: ประมาณ 1 เดือน`,
+    `รายงานข้อมูลวาระการดำรงตำแหน่ง: ${t.name}`,
     ``,
     `ชื่อ: ${t.name}`,
     `ตำแหน่ง: ${t.positionLabel}`,
@@ -277,8 +264,8 @@ export function renderOneMonth(p, opts = {}) {
   ].filter(Boolean).join('\n');
 
   return {
-    subject: customSubject || `ข้อมูลวาระคงเหลือ 1 เดือน: ${t.name} (${t.endDateThai})`,
-    html: customBody || layout(`เตือนวาระ 1 เดือน — ${t.name}`, defaultBody),
+    subject: customSubject || `รายงานวาระการดำรงตำแหน่ง ${t.year}: ${t.name}`,
+    html: customBody || layout(`รายงานวาระการดำรงตำแหน่ง — ${t.name}`, defaultBody),
     text: cfg.templateText ? interpolateTemplate(cfg.templateText, t) : defaultText,
   };
 }

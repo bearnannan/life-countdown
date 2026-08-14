@@ -1,3 +1,10 @@
+## [2026-08-14 15:45]
+- **Files Modified:** `server/email-templates.js`, `server/settings.js`, `CHANGELOG.md`
+- **Changes:**
+  - `server/email-templates.js`: ปรับ `renderSixMonth` และ `renderOneMonth` ให้ใช้รูปแบบหัวข้อทางการ `รายงานวาระการดำรงตำแหน่ง {{year}}: {{person_name}}` (S2 Format) และปรับเนื้อหา Body ให้แสดงตารางข้อมูลบุคคลแบบ Table Report (B2 Format) แทน Card layout
+  - `server/settings.js`: อัปเดตค่าเริ่มต้นหัวข้อการแจ้งเตือน 6 เดือน และ 1 เดือน ให้สอดคล้องกับ S2 Format
+- **Reason:** ผ่านการทดสอบความเข้ากันได้ของ Microsoft 365 Group Mailbox Filter ส่งผลให้อีเมลแจ้งเตือนวาระรายบุคคลเข้าสู่ Group Conversation ของ `dopa-only-tm@forth.co.th` ได้อย่างราบรื่น
+
 ## [2026-08-14 15:05]
 - **Files Modified:** `server/smtp.js`, `server/email-templates.js`, `server/db.js`, `server/notification-engine.js`, `server/cloud-notification-engine.js`, `server/cloud-api.js`, `server/api.js`, `server/supabase-rest.js`, `tests/email-rendering.test.js`, `.gitignore`, `.env.example`, `CHANGELOG.md`
 - **Changes:**

@@ -71,7 +71,7 @@ export const DEFAULT_SETTINGS = Object.freeze({
       cc: (process.env.NOTIFY_6M_CC || '').split(',').map((s) => s.trim()).filter(Boolean),
       bcc: [],
       includePerson: String(process.env.NOTIFY_6M_INCLUDE_PERSON ?? 'true').toLowerCase() !== 'false',
-      subject: 'แจ้งเตือนใกล้หมดวาระ 6 เดือน — {{person_name}}',
+      subject: 'รายงานวาระการดำรงตำแหน่ง {{year}}: {{person_name}}',
       templateHtml: '',
     },
     one_month: {
@@ -82,7 +82,7 @@ export const DEFAULT_SETTINGS = Object.freeze({
       cc: (process.env.NOTIFY_1M_CC || '').split(',').map((s) => s.trim()).filter(Boolean),
       bcc: [],
       includePerson: String(process.env.NOTIFY_1M_INCLUDE_PERSON ?? 'true').toLowerCase() !== 'false',
-      subject: 'แจ้งเตือนใกล้หมดวาระ 1 เดือน — {{person_name}}',
+      subject: 'รายงานวาระการดำรงตำแหน่ง {{year}}: {{person_name}}',
       templateHtml: '',
     },
     annual_summary: {
