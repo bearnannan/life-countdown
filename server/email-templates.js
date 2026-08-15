@@ -131,7 +131,7 @@ function personTable(t, tone) {
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:16px;">
       <tr>
         <td style="background-color:${highlightBg};border:1px solid ${highlightBorder};padding:10px 14px;border-radius:6px;color:${highlightColor};font-size:13px;font-weight:bold;">
-          📌 ${badgeTitle}
+          ${badgeTitle}
         </td>
       </tr>
     </table>

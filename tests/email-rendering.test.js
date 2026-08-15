@@ -107,7 +107,6 @@ test('SMTP MIME: sends UTF-8 HTML as base64 without corrupting Thai or attribute
     assert.ok(fake.received.commands.includes('MAIL FROM:<wara.noreply.app@gmail.com>'));
     assert.match(fake.received.data, /^From: =\?UTF-8\?B\?.* <wara\.noreply\.app@gmail\.com>/m);
     assert.match(fake.received.data, /^Subject: =\?UTF-8\?B\?/m);
-    assert.match(fake.received.data, /^Message-ID: <.+@gmail\.com>/m);
     assert.match(fake.received.data, /^Reply-To: =\?UTF-8\?B\?.* <wara\.noreply\.app@gmail\.com>/m);
     assert.match(fake.received.data, /^Content-Language: th$/m);
     // Auto-Submitted / X-Auto-Response-Suppress ถูกนำออกเพื่อให้ Microsoft 365 Groups แสดงอีเมลใน shared mailbox

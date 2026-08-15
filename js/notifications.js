@@ -9,6 +9,10 @@
 //   ไม่เคยถูกส่ง/แสดงในเบราว์เซอร์
 // ============================================================
 
+import { initSpotlightCards } from './spotlight.js';
+import { initSpecularButtons } from './specular-button.js';
+import { attachAdminBackground } from './admin-background.js';
+
 const TYPE_LABELS = {
   six_month: {
     th: 'เตือน 6 เดือน',
@@ -138,12 +142,13 @@ function roleDefaults(type) {
 
 function setBusy(button, busy, busyText) {
   if (!button) return;
+  const target = button.querySelector('.specular-button__label') || button;
   if (busy) {
-    button.dataset.originalText = button.textContent;
-    button.textContent = busyText;
+    button.dataset.originalText = target.textContent;
+    target.textContent = busyText;
     button.disabled = true;
   } else {
-    button.textContent = button.dataset.originalText || button.textContent;
+    target.textContent = button.dataset.originalText || target.textContent;
     button.disabled = false;
   }
 }
@@ -269,7 +274,7 @@ function notificationWorkbench(notif, thresholds) {
 
         <div class="subtab-panel hidden" data-subtab-panel="${type}:preview">
           <div class="preview-actions">
-            <button type="button" class="btn btn-sm render-preview-btn" data-render-preview="${type}">รีเฟรชตัวอย่าง</button>
+            <button type="button" class="btn btn-sm render-preview-btn specular-button" data-specular-preset="secondary" data-render-preview="${type}">รีเฟรชตัวอย่าง</button>
             <span class="muted">ตัวอย่างใช้ข้อมูลจำลอง และไม่สร้างบันทึกการส่ง</span>
           </div>
           <div class="preview-result" data-preview-result="${type}"><div class="muted">กำลังโหลดตัวอย่าง...</div></div>
@@ -278,7 +283,7 @@ function notificationWorkbench(notif, thresholds) {
         <div class="subtab-panel hidden" data-subtab-panel="${type}:test">
           <div class="test-row inline-test-row">
             <input type="email" data-test-to="${type}" placeholder="อีเมลผู้รับทดสอบ">
-            <button type="button" class="btn btn-sm send-test-email-btn" data-send-test="${type}">ส่งอีเมลทดสอบ</button>
+            <button type="button" class="btn btn-sm send-test-email-btn specular-button" data-specular-preset="primary" data-send-test="${type}">ส่งอีเมลทดสอบ</button>
             <span data-test-result="${type}" class="muted"></span>
           </div>
         </div>
@@ -292,7 +297,7 @@ function notificationWorkbench(notif, thresholds) {
           <h3>การตั้งค่าอีเมลแจ้งเตือน</h3>
           <p>จัดการเทมเพลต ผู้รับ ตัวอย่าง และการทดสอบส่งอีเมลสำหรับการแจ้งเตือนวาระ</p>
         </div>
-        <button id="saveNotifSettings" class="btn btn-primary btn-sm">บันทึกการตั้งค่าและเทมเพลต</button>
+        <button id="saveNotifSettings" class="btn btn-sm specular-button" data-specular-preset="primary" type="button">บันทึกการตั้งค่าและเทมเพลต</button>
       </div>
       <div class="notif-rule-grid">
         <aside class="rule-list">${rules}</aside>
@@ -300,8 +305,8 @@ function notificationWorkbench(notif, thresholds) {
       </div>
     </section>
     <div class="admin-actions-row">
-      <button id="runCycleBtn" class="btn btn-sm">รันรอบทันที</button>
-      <button id="testEmailBtn" class="btn btn-sm">เปิดหน้าทดสอบของรายการแรก</button>
+      <button id="runCycleBtn" class="btn btn-sm specular-button" data-specular-preset="secondary" type="button">รันรอบทันที</button>
+      <button id="testEmailBtn" class="btn btn-sm specular-button" data-specular-preset="secondary" type="button">เปิดหน้าทดสอบของรายการแรก</button>
     </div>`;
 }
 
@@ -340,16 +345,24 @@ export function renderNotificationStatus(container, status) {
   <div class="notif-admin">
     <form class="admin-token-row" id="adminTokenForm">
       <label>รหัสปลดล็อกผู้ดูแล <input type="password" id="adminTokenInput" form="adminTokenForm" placeholder="${isLocalHost ? 'dev-token' : 'ADMIN_TOKEN'}" value="${esc(readToken())}" autocomplete="off"></label>
-      <button id="adminTokenSave" class="btn btn-sm" type="submit">ปลดล็อก</button>
-      <button id="adminTokenDevFill" class="btn btn-sm dev-token-btn ${isLocalHost ? '' : 'hidden'}" type="button">ใช้ dev-token</button>
+      <button id="adminTokenSave" class="btn btn-sm specular-button" data-specular-preset="primary" type="submit">ปลดล็อก</button>
+      <button id="adminTokenDevFill" class="btn btn-sm dev-token-btn specular-button ${isLocalHost ? '' : 'hidden'}" data-specular-preset="secondary" type="button">ใช้ dev-token</button>
       <button type="button" id="adminControlsToggle" class="btn btn-sm admin-controls-toggle" ${isAdmin ? '' : 'disabled'} aria-expanded="${expanded ? 'true' : 'false'}" aria-controls="adminControls" title="${!isAdmin ? 'ต้องปลดล็อกผู้ดูแลก่อนขยายส่วนตั้งค่า' : (expanded ? 'ย่อส่วนตั้งค่า' : 'ขยายส่วนตั้งค่า')}" aria-label="${!isAdmin ? 'ต้องปลดล็อกผู้ดูแลก่อนขยายส่วนตั้งค่า' : (expanded ? 'ย่อส่วนตั้งค่า' : 'ขยายส่วนตั้งค่า')}">${chevronIcon(expanded)}</button>
       <span class="muted" style="font-size:12px">ใช้สำหรับเปิด/ปิด กำหนดผู้รับ สั่งรัน และส่งทดสอบ โดยไม่ส่งรหัสผ่าน SMTP</span>
     </form>
 
     <div id="adminControls" class="admin-controls ${isAdmin ? '' : 'is-locked'} ${expanded ? '' : 'is-collapsed'}">
-      ${isAdmin ? '' : `<div class="admin-lock-banner">หน้านี้ดูได้เลย แต่ถ้าจะบันทึก/ส่งทดสอบ/ดูตัวอย่างแบบสด ต้องปลดล็อกก่อน${isLocalHost ? ' ตอนรัน local ที่เปิดให้ตอนนี้ใช้รหัส <code>dev-token</code>' : ''}</div>`}
-      ${notificationWorkbench(notif, thresholds)}
-      <div id="adminMsg" class="admin-msg"></div>
+      <div class="admin-controls__bg" aria-hidden="true">
+        <div class="admin-bg-aurora"></div>
+        <div class="admin-bg-grid"></div>
+        <div class="admin-bg-glow"></div>
+        <div class="admin-bg-vignette"></div>
+      </div>
+      <div class="admin-controls__content">
+        ${isAdmin ? '' : `<div class="admin-lock-banner">หน้านี้ดูได้เลย แต่ถ้าจะบันทึก/ส่งทดสอบ/ดูตัวอย่างแบบสด ต้องปลดล็อกก่อน${isLocalHost ? ' ตอนรัน local ที่เปิดให้ตอนนี้ใช้รหัส <code>dev-token</code>' : ''}</div>`}
+        ${notificationWorkbench(notif, thresholds)}
+        <div id="adminMsg" class="admin-msg"></div>
+      </div>
     </div>
 
     <div class="admin-login-note ${isAdmin ? 'hidden' : ''}">
@@ -434,7 +447,7 @@ export function renderNotificationStatus(container, status) {
           <p class="smtp-sub">ตั้งค่าเซิร์ฟเวอร์ SMTP และบทบาทที่จะรับการแจ้งเตือนตามเหตุการณ์</p>
         </div>
       </div>
-      <button type="button" id="smtpTestBtnHeader" class="btn btn-sm btn-outline-primary">${uiIcon('send')} ทดสอบส่งอีเมล</button>
+      <button type="button" id="smtpTestBtnHeader" class="btn btn-sm specular-button" data-specular-preset="primary">${uiIcon('send')} ทดสอบส่งอีเมล</button>
     </div>
 
     <div class="smtp-form-grid">
@@ -511,14 +524,14 @@ export function renderNotificationStatus(container, status) {
         <span id="activeCertBadge" class="active-badge ${smtp.rejectUnauthorized !== false ? 'badge-green' : 'badge-amber'}">${smtp.rejectUnauthorized !== false ? 'ตรวจใบรับรอง TLS แล้ว' : 'ไม่ได้ตรวจใบรับรอง TLS'}</span>
       </div>
 
-      <button type="button" id="saveSmtpServerBtn" class="btn btn-primary btn-lg">${uiIcon('save')} บันทึกเซิร์ฟเวอร์ SMTP</button>
+      <button type="button" id="saveSmtpServerBtn" class="btn btn-primary btn-lg specular-button" data-specular-preset="primary">${uiIcon('save')} บันทึกเซิร์ฟเวอร์ SMTP</button>
     </div>
   </div>`;
 
   // แทรกลงใน DOM ของ admin controls
-  const adminControls = adminRoot.querySelector('.admin-controls');
-  if (adminControls && !adminRoot.querySelector('.smtp-config-card')) {
-    adminControls.insertAdjacentHTML('afterbegin', smtpSectionHtml);
+  const adminContent = adminRoot.querySelector('.admin-controls__content') || adminRoot.querySelector('.admin-controls');
+  if (adminContent && !adminRoot.querySelector('.smtp-config-card')) {
+    adminContent.insertAdjacentHTML('afterbegin', smtpSectionHtml);
   }
   applyAdminControlsState(adminRoot);
   if (!isAdmin) {
@@ -839,6 +852,10 @@ export function renderNotificationStatus(container, status) {
     const tbody = container.querySelector('#notifEventsTable');
     if (tbody) tbody.innerHTML = '<div class="muted" style="padding:12px">กรอกรหัสปลดล็อกผู้ดูแลเพื่อดูบันทึกการส่ง</div>';
   }
+
+  attachAdminBackground(document.querySelector('#adminControls'));
+  initSpotlightCards('.notif-card, .smtp-config-card, .notification-workbench');
+  initSpecularButtons('#retryFailedBtn, #refreshEventsBtn, #adminTokenSave, #adminTokenDevFill, #saveNotifSettings, #saveSmtpServerBtn, #smtpTestBtnHeader, #runCycleBtn, #testEmailBtn, .render-preview-btn, .send-test-email-btn');
 }
 
 async function refreshEvents(container) {
@@ -868,9 +885,10 @@ async function refreshEvents(container) {
         <td class="cell-muted">${r.retry_count || 0}</td>
         <td class="cell-muted" title="${esc(r.error_message || '')}">${esc((r.error_message || '').slice(0, 40))}</td>
         <td class="cell-muted">${fmtDateTime(r.trigger_at)}</td>
-        <td>${r.status === 'failed' ? `<button class="btn btn-sm retry-event-btn" data-event-id="${r.id}">ส่งซ้ำ</button>` : ''}</td>
+        <td>${r.status === 'failed' ? `<button class="btn btn-sm retry-event-btn specular-button" data-specular-preset="secondary" data-event-id="${r.id}">ส่งซ้ำ</button>` : ''}</td>
       </tr>`).join('');
     tbody.innerHTML = `<div class="table-scroll"><table><thead><tr><th>ชนิด</th><th>บุคคล</th><th>ผู้รับ</th><th>สถานะ</th><th>ครั้งที่ลอง</th><th>ข้อผิดพลาด</th><th>เวลา</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    initSpecularButtons('.retry-event-btn');
     tbody.querySelectorAll('.retry-event-btn').forEach((btn) => {
       btn.addEventListener('click', async () => {
         try {

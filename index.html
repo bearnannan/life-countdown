@@ -1,17 +1,31 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>แดชบอร์ดวาระคงเหลือ — ผู้ใหญ่บ้าน / กำนัน</title>
+  <script type="importmap">
+  {
+    "imports": {
+      "ogl": "/node_modules/ogl/src/index.js"
+    }
+  }
+  </script>
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/scanner.css">
+  <link rel="stylesheet" href="css/specular-button.css">
+  <link rel="stylesheet" href="css/spotlight.css">
+  <link rel="stylesheet" href="css/admin-background.css">
 </head>
 <body>
+  <div id="scanner-bg" class="scanner-bg-fixed" aria-hidden="true"></div>
 
   <header class="topbar">
     <div class="topbar-inner">
       <div class="brand">
-        <div class="brand-icon">📋</div>
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M9 12h6"/><path d="M9 16h6"/></svg>
+        </div>
         <div>
           <h1>แดชบอร์ดวาระคงเหลือ</h1>
           <p>ผู้ใหญ่บ้าน / กำนัน / ผู้ช่วยฯ — วันคงเหลือคำนวณจากวันที่สิ้นสุดวาระแบบเรียลไทม์</p>
@@ -25,7 +39,9 @@
         <span class="tz-chip">Asia/Bangkok (UTC+7)</span>
         <button
           id="notifAdminTopbarBtn"
-          class="topbar-action"
+          class="topbar-action specular-button specular-button--sm"
+          data-specular-button
+          data-specular-preset="topbar"
           type="button"
           aria-expanded="false"
           aria-controls="notificationAdminPanel"
@@ -79,8 +95,8 @@
             <option value="province">จังหวัด</option>
           </select>
         </label>
-        <button id="refreshBtn" class="btn" title="คำนวณวันคงเหลือใหม่จากเวลาปัจจุบัน">↻ รีเฟรช</button>
-        <button id="settingsBtn" class="btn" title="ปรับเกณฑ์และวันที่อ้างอิง">⚙ ตั้งค่า</button>
+        <button id="refreshBtn" class="btn specular-button specular-button--sm" data-specular-button data-specular-preset="primary" title="คำนวณวันคงเหลือใหม่จากเวลาปัจจุบัน"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><path d="M21 12a9 9 0 0 1-15.5 6.2"/><path d="M3 12A9 9 0 0 1 18.5 5.8"/><path d="M18 3v4h-4"/><path d="M6 21v-4h4"/></svg> รีเฟรช</button>
+        <button id="settingsBtn" class="btn specular-button specular-button--sm" data-specular-button data-specular-preset="secondary" title="ปรับเกณฑ์และวันที่อ้างอิง"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> ตั้งค่า</button>
       </div>
     </section>
 
@@ -93,7 +109,7 @@
         <label>วันที่อ้างอิงข้อมูล (วันที่วัด "วาระคงเหลือ")
           <input id="referenceInput" type="date" aria-label="วันที่อ้างอิงข้อมูล">
         </label>
-        <button id="resetSettingsBtn" class="btn">รีเซ็ตเป็นค่าเริ่มต้น</button>
+        <button id="resetSettingsBtn" class="btn specular-button specular-button--sm" data-specular-button data-specular-preset="secondary"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg> รีเซ็ตเป็นค่าเริ่มต้น</button>
         <div class="settings-note">
           วันที่สิ้นสุดวาระ = วันที่อ้างอิง + วาระคงเหลือ (เช่น "5 ปี 1 เดือน") ค่าที่แก้จะถูกบันทึกในเบราว์เซอร์นี้
           และมีผลเหนือค่าที่กำหนดใน <code>js/config.js</code> โดยไม่แก้ไฟล์ข้อมูลต้นฉบับ
@@ -143,7 +159,7 @@
           <span class="swatch" style="background:#dc2626"></span><b>หมดวาระแล้ว</b> — วันคงเหลือ &lt; 0
           <span class="swatch" style="background:#64748b"></span><b>ข้อมูลไม่สมบูรณ์</b> — วาระหรือวันที่ไม่ถูกต้อง/ขาดหาย</li>
         <li><b>วันคงเหลือ</b> คำนวณสดทุกครั้งจากเวลาปัจจุบัน: <code>วันคงเหลือ = วันที่สิ้นสุดวาระ − วันนี้</code> (โซนเวลา Asia/Bangkok) และคำนวณใหม่ให้อัตโนมัติเมื่อวันที่เปลี่ยน (เที่ยงคืนตามเวลาไทย)</li>
-        <li><b>วันที่สิ้นสุดวาระ</b> ได้จากข้อมูล "วาระคงเหลือ" (เช่น "5 ปี 1 เดือน") บวกกับ <b>วันที่อ้างอิงข้อมูล</b> — แก้ได้ใน "⚙ ตั้งค่า"</li>
+        <li><b>วันที่สิ้นสุดวาระ</b> ได้จากข้อมูล "วาระคงเหลือ" (เช่น "5 ปี 1 เดือน") บวกกับ <b>วันที่อ้างอิงข้อมูล</b> — แก้ได้ใน "ตั้งค่า"</li>
         <li>ข้อมูลอ้างอิง ณ วันที่ <b id="metaRef">—</b> • เกณฑ์ใกล้หมดวาระ ≤ <b id="metaThreshold">—</b> วัน • อัปเดตล่าสุด <b id="metaUpdated">—</b> น. • จำนวน <b id="metaCount">—</b> ราย</li>
       </ul>
     </section>

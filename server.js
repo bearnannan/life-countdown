@@ -2,6 +2,9 @@ import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+try { process.loadEnvFile?.(); } catch {}
+
 import { loadSheetCsv } from './server/google-sheets.js';
 import { handleCloudApi } from './server/cloud-api.js';
 

@@ -37,7 +37,78 @@ async function request(path, { method = 'GET', body, headers = {} } = {}) {
   return data;
 }
 
+const memoryStore = {
+  settings: {},
+  events: [],
+  audit: [],
+  idCounter: 1,
+};
+
 export function createSupabaseDb() {
+  if (!getSupabaseUrl() || !getSupabaseKey()) {
+    // Memory fallback when Supabase is not configured (e.g. dev/preview mode)
+    return {
+      async getSetting(key) { return memoryStore.settings[key] || null; },
+      async getAllSettings() { return { ...memoryStore.settings }; },
+      async setSetting(key, value) { memoryStore.settings[key] = String(value); },
+      async audit({ actor = 'system', action, detail = null }) {
+        memoryStore.audit.unshift({ id: memoryStore.idCounter++, actor, action, detail, created_at: new Date().toISOString() });
+      },
+      async notificationCounts() {
+        const out = { six_month: {}, one_month: {}, annual_summary: {} };
+        for (const row of memoryStore.events) {
+          out[row.notification_type] = out[row.notification_type] || {};
+          out[row.notification_type][row.status] = (out[row.notification_type][row.status] || 0) + 1;
+        }
+        return out;
+      },
+      async recentEvents(limit = 50) { return memoryStore.events.slice(0, Number(limit) || 50); },
+      async recentAudit(limit = 50) { return memoryStore.audit.slice(0, Number(limit) || 50); },
+      async insertEventIgnore(event) {
+        const existing = memoryStore.events.find((e) => e.notification_key === event.notification_key);
+        if (!existing) {
+          memoryStore.events.unshift({ id: memoryStore.idCounter++, ...event, created_at: new Date().toISOString(), updated_at: new Date().toISOString() });
+        }
+      },
+      async getEventByKey(notificationKey) {
+        return memoryStore.events.find((e) => e.notification_key === notificationKey) || null;
+      },
+      async getEventById(id) {
+        return memoryStore.events.find((e) => e.id === Number(id)) || null;
+      },
+      async claimEvent(id, status = 'pending') {
+        const ev = memoryStore.events.find((e) => e.id === Number(id) && e.status === status);
+        if (ev) {
+          ev.status = 'sending';
+          ev.updated_at = new Date().toISOString();
+          return { ...ev };
+        }
+        return null;
+      },
+      async updateEvent(id, patch) {
+        const ev = memoryStore.events.find((e) => e.id === Number(id));
+        if (ev) {
+          Object.assign(ev, patch, { updated_at: new Date().toISOString() });
+          return { ...ev };
+        }
+        return null;
+      },
+      async resetFailed(eventId = null) {
+        for (const ev of memoryStore.events) {
+          if ((!eventId || ev.id === Number(eventId)) && ev.status === 'failed') {
+            ev.status = 'pending';
+            ev.retry_count = 0;
+            ev.error_message = null;
+            ev.updated_at = new Date().toISOString();
+          }
+        }
+      },
+      async stuckEvents(maxRetries) {
+        return memoryStore.events.filter((e) => (e.status === 'failed' || e.status === 'pending') && (e.retry_count || 0) < Number(maxRetries));
+      },
+    };
+  }
+
   return {
     async getSetting(key) {
       const rows = await request(`system_settings?key=eq.${encodeURIComponent(key)}&select=value&limit=1`);

@@ -17,6 +17,9 @@ import {
   parseDate,
 } from './dates.js';
 import { initNotifications } from './notifications.js';
+import { createScanner, SCANNER_PRESETS } from './scanner.js';
+import { initSpecularButtons } from './specular-button.js';
+import { attachSpotlight, initSpotlightCards } from './spotlight.js';
 
 const LS = {
   threshold: 'wara.threshold',
@@ -81,6 +84,8 @@ async function init() {
   setInterval(updateClock, 1000);
   scheduleMidnightRefresh();
   initNotifications($('#notifBody'));
+  initBackgroundScanner();
+  initSpecularButtons();
 
   try {
     const res = await fetch(state.config.csvUrl);
@@ -92,6 +97,16 @@ async function init() {
     render();
   } catch (err) {
     showError(err);
+  }
+}
+
+async function initBackgroundScanner() {
+  const bgEl = document.getElementById('scanner-bg');
+  if (!bgEl) return;
+  try {
+    await createScanner(bgEl, SCANNER_PRESETS.subtleNavy);
+  } catch (err) {
+    console.warn('[Scanner] Background initialization skipped:', err);
   }
 }
 
@@ -122,24 +137,28 @@ function render() {
   renderTable();
   renderMeta(now);
   renderSettings();
+  initSpotlightCards('.panel');
 }
 
 function renderKpis() {
   const k = computeKpis(state.records);
   const cards = [
-    { id: 'total', label: 'ทั้งหมด', count: k.total, sub: 'ราย', color: '#0f172a', bg: '#e2e8f0', icon: ICONS.users, filter: 'all' },
-    { id: 'active', label: 'ดำรงวาระ', count: k.active, sub: `วันคงเหลือ > ${state.config.expiringSoonThresholdDays} วัน`, color: CONFIG.status.active.color, bg: '#dcfce7', icon: ICONS.check, filter: STATUS.ACTIVE },
-    { id: 'expiring', label: 'ใกล้หมดวาระ', count: k.expiring, sub: `วันคงเหลือ ≤ ${state.config.expiringSoonThresholdDays} วัน`, color: CONFIG.status.expiring.color, bg: '#fef3c7', icon: ICONS.clock, filter: STATUS.EXPIRING },
-    { id: 'expired', label: 'หมดวาระแล้ว', count: k.expired, sub: 'เกินวันสิ้นสุดวาระ', color: CONFIG.status.expired.color, bg: '#fee2e2', icon: ICONS.x, filter: STATUS.EXPIRED },
-    { id: 'invalid', label: 'ข้อมูลไม่สมบูรณ์', count: k.invalid, sub: 'วาระ/วันที่ไม่ถูกต้อง', color: CONFIG.status.invalid.color, bg: '#f1f5f9', icon: ICONS.alert, filter: STATUS.INVALID },
+    { id: 'total', label: 'ทั้งหมด', count: k.total, sub: 'ราย', color: '#38bdf8', bg: 'rgba(56, 189, 248, 0.15)', spotlight: 'rgba(56, 189, 248, 0.2)', icon: ICONS.users, filter: 'all' },
+    { id: 'active', label: 'ดำรงวาระ', count: k.active, sub: `วันคงเหลือ > ${state.config.expiringSoonThresholdDays} วัน`, color: '#4ade80', bg: 'rgba(34, 197, 94, 0.15)', spotlight: 'rgba(34, 197, 94, 0.2)', icon: ICONS.check, filter: STATUS.ACTIVE },
+    { id: 'expiring', label: 'ใกล้หมดวาระ', count: k.expiring, sub: `วันคงเหลือ ≤ ${state.config.expiringSoonThresholdDays} วัน`, color: '#fbbf24', bg: 'rgba(245, 158, 11, 0.15)', spotlight: 'rgba(245, 158, 11, 0.2)', icon: ICONS.clock, filter: STATUS.EXPIRING },
+    { id: 'expired', label: 'หมดวาระแล้ว', count: k.expired, sub: 'เกินวันสิ้นสุดวาระ', color: '#f87171', bg: 'rgba(239, 68, 68, 0.15)', spotlight: 'rgba(239, 68, 68, 0.2)', icon: ICONS.x, filter: STATUS.EXPIRED },
+    { id: 'invalid', label: 'ข้อมูลไม่สมบูรณ์', count: k.invalid, sub: 'วาระ/วันที่ไม่ถูกต้อง', color: '#cbd5e1', bg: 'rgba(100, 116, 139, 0.15)', spotlight: 'rgba(148, 163, 184, 0.2)', icon: ICONS.alert, filter: STATUS.INVALID },
   ];
 
   const wrap = $('#kpis');
   wrap.replaceChildren();
   for (const c of cards) {
     const el = document.createElement('button');
-    el.className = 'kpi-card';
+    el.className = 'kpi-card spotlight-card';
     el.style.setProperty('--accent', c.color);
+    el.dataset.spotlightColor = c.spotlight;
+    attachSpotlight(el, { color: c.spotlight });
+
     if (state.statusFilter === c.filter) el.classList.add('active');
     el.title = 'คลิกเพื่อกรอง';
     el.addEventListener('click', () => {
@@ -253,7 +272,7 @@ function renderRow(r, today) {
   if (r.flags.length) {
     const flag = document.createElement('span');
     flag.className = 'flag';
-    flag.textContent = '⚠';
+    flag.innerHTML = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-1px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
     flag.title = r.flags.join('\n');
     tdName.appendChild(flag);
   }
