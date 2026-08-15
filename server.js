@@ -14,6 +14,7 @@ const PORT = Number(process.env.PORT) > 0 ? Number(process.env.PORT) : 4173;
 const MIME = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
+  '.mjs': 'text/javascript; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
   '.csv': 'text/csv; charset=utf-8',
   '.json': 'application/json; charset=utf-8',
@@ -69,19 +70,28 @@ export default async function handler(req, res) {
     let urlPath = decodeURIComponent(reqUrl.pathname);
     if (urlPath.endsWith('/')) urlPath += 'index.html';
 
-    const filePath = normalize(join(ROOT, urlPath));
+    let filePath = normalize(join(ROOT, urlPath));
     if (!filePath.startsWith(ROOT)) {
       res.writeHead(403, { 'Content-Type': 'text/plain; charset=utf-8' });
       res.end('Forbidden');
       return;
     }
 
-    const s = await stat(filePath);
-    if (!s.isFile()) throw new Error('not a file');
+    let targetPath = filePath;
+    try {
+      const s = await stat(targetPath);
+      if (!s.isFile()) throw new Error('not a file');
+    } catch (err) {
+      if (urlPath === '/favicon.ico') {
+        targetPath = join(ROOT, 'favicon.svg');
+      } else {
+        throw err;
+      }
+    }
 
-    const data = await readFile(filePath);
+    const data = await readFile(targetPath);
     res.writeHead(200, {
-      'Content-Type': MIME[extname(filePath).toLowerCase()] || 'application/octet-stream',
+      'Content-Type': MIME[extname(targetPath).toLowerCase()] || 'application/octet-stream',
       'Cache-Control': 'no-cache',
     });
     res.end(data);

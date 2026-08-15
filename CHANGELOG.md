@@ -1,3 +1,12 @@
+## [2026-08-15 12:56]
+- **Files Modified:** `index.html`, `server.js`, `favicon.svg`, `CHANGELOG.md`
+- **Changes:**
+  - **404 Asset Resolution (`/node_modules/ogl/src/index.js` & `/favicon.ico`):**
+    - ปรับปรุง `<script type="importmap">` ใน `index.html` ให้โหลด `ogl` ผ่าน Universal ESM CDN (`https://esm.sh/ogl@1.0.11`) ทำให้สามารถใช้งานได้ทั้งบน Local Static Server และ Production/Vercel โดยไม่พึ่งพา Local `node_modules` path ในบราวเซอร์
+    - สร้าง `favicon.svg` สไตล์ Modern Cyan Clipboard Icon และผูก `<link rel="icon">` ใน `index.html`
+    - ปรับปรุง `server.js` ให้รองรับการ Fallback คำขอ `/favicon.ico` ไปยัง `favicon.svg` ส่งคืนสถานะ `200 OK` (MIME `image/svg+xml`) แทน 404
+- **Reason:** แก้ไขปัญหา Resource 404 สำหรับ WebGL OGL Engine และ Favicon ในบราวเซอร์
+
 ## [2026-08-15 12:33]
 - **Files Modified:** `package.json`, `package-lock.json`, `README-SMTP-Setup.md`, `CHANGELOG.md`
 - **Files/Folders Removed:** `src/`, `implementation_plan.md`, `migration.sql`, `scripts/test-variations.mjs`, `.vercel/`
