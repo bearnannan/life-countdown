@@ -93,7 +93,7 @@ export function layout(title, bodyHtml) {
                 ระบบติดตามวาระการดำรงตำแหน่ง
               </td>
               <td align="right" style="color:#e2e8f0;font-size:12px;font-weight:normal;">
-                กรมการปกครอง · กระทรวงมหาดไทย
+                Life Countdown System
               </td>
             </tr>
           </table>
@@ -107,10 +107,7 @@ export function layout(title, bodyHtml) {
         <!-- Official Footer -->
         <tr><td style="padding:16px 28px;background-color:#fafbfc;border-top:1px solid ${BRAND.border};color:${BRAND.slateLight};font-size:12px;line-height:1.6;">
           <p style="margin:0 0 4px;font-weight:bold;color:${BRAND.slate};">
-            เอกสารรายงานสารสนเทศเพื่อการบริหารจัดการวาระการดำรงตำแหน่ง
-          </p>
-          <p style="margin:0;">
-            อีเมลนี้จัดส่งโดยระบบประมวลผลอัตโนมัติ — กรุณาอย่าตอบกลับอีเมลนี้โดยตรง
+            Life Countdown — รายงานสรุปสถานะวาระ
           </p>
         </td></tr>
       </table>

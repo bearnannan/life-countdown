@@ -34,7 +34,7 @@ ${bodyContent}
         </td></tr>
         <tr><td style="padding:16px 28px; border-top:1px solid #e5e5e5;">
           <p style="margin:0; font-size:12px; color:#888; text-align:center;">
-            ระบบแจ้งเตือนวาระอัตโนมัติ — Life Countdown Dashboard
+            Life Countdown Notification
           </p>
         </td></tr>
       </table>

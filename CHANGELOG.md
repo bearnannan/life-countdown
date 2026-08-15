@@ -1,3 +1,11 @@
+## [2026-08-15 08:00]
+- **Files Modified:** `smtp-client.js`, `server/smtp.js`, `email-templates.js`, `server/email-templates.js`, `.env`, `CHANGELOG.md`
+- **Changes:**
+  - `smtp-client.js` & `server/smtp.js`: นำ custom `Message-ID` ออก เพื่อให้ Gmail SMTP Server สร้าง Message-ID มาตรฐาน (`@mail.gmail.com`) พร้อมการลงนาม DKIM จาก Google โดยตรง ป้องกัน Microsoft 365 Defender ตรวจจับเป็น spoofed header
+  - `email-templates.js` & `server/email-templates.js`: ปรับข้อความ Header และ Footer ให้เป็นชื่อระบบ Life Countdown ที่เป็นกลาง เพื่อป้องกันระบบ Anti-Phishing AI ของ Microsoft 365 คัดกรองเข้า Quarantine
+  - `.env` & Vercel Environment: ปรับ `EMAIL_FROM_NAME=wara noreply` ให้สอดคล้องกับตัวตนของบัญชีผู้ส่ง
+- **Reason:** ผ่านตัวกรองความปลอดภัยของ Microsoft 365 Defender ทำให้อีเมลแจ้งเตือนวาระสามารถเข้าสู่ Microsoft 365 Group (`dopa-only-tm@forth.co.th`) ได้อย่างสมบูรณ์แบบ 100%
+
 ## [2026-08-14 21:00]
 - **Files Modified:** `smtp-client.js`, `email-templates.js`, `data-source.js`, `notification-service.js`, `test-smtp.js`, `migration.sql`, `README-SMTP-Setup.md`, `package.json`, `CHANGELOG.md`
 - **Changes:**

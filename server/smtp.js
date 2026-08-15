@@ -301,7 +301,6 @@ export async function sendMail(opts) {
       `To: ${to.join(', ')}`,
       cc.length ? `Cc: ${cc.join(', ')}` : null,
       `Subject: ${encodeHeader(subject)}`,
-      `Message-ID: ${messageIdFor(from)}`,
       `Reply-To: ${encodeAddressHeader(from)}`,
       'Content-Language: th',
       'MIME-Version: 1.0',

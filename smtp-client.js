@@ -91,7 +91,6 @@ function buildMimeMessage({ from, fromName, to, cc, subject, html, text }) {
 
   headers.push(
     `Subject: ${encodedSubject}`,
-    `Message-ID: ${messageId}`,
     `MIME-Version: 1.0`,
     `Content-Type: multipart/alternative; boundary="${boundary}"`,
   );
