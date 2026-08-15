@@ -1,3 +1,19 @@
+## [2026-08-15 10:15]
+- **Files Modified:** `components/LightTunnel/LightTunnel.jsx`, `components/LightTunnel/LightTunnel.css`, `components/LightTunnel/index.js`, `src/components/LightTunnel/LightTunnel.jsx`, `src/components/LightTunnel/LightTunnel.css`, `src/components/LightTunnel/index.js`, `js/light-tunnel.js`, `css/light-tunnel.css`, `light-tunnel-demo.html`, `CHANGELOG.md`
+- **Changes:**
+  - ติดตั้งและ integrate คอมโพเนนต์ `<LightTunnel />` จาก React Bits (OGL WebGL 2.0 Shader Tunnel Effect)
+  - สร้างไฟล์คอมโพเนนต์ React ทั้งในโฟลเดอร์ `components/LightTunnel/` และ `src/components/LightTunnel/` รองรับ Props ครบทุกตัว (cableColor, pulseColor, tunnelColor, speed, flowDirection, cableCount, waviness, sway, mouseInteraction, ฯลฯ)
+  - พัฒนาโมดูล Vanilla JavaScript / ES Module (`js/light-tunnel.js` และ `css/light-tunnel.css`) เพื่อให้สามารถเรียกใช้งานบนหน้าเว็บ Native HTML/JS ได้โดยตรง
+  - สร้างหน้าสาธิตแบบอินเทอร์แอคทีฟ `light-tunnel-demo.html` พร้อม Preset ธีม (Cyberpunk, Matrix, Hyperdrive, Solar, Warp) และ Live Controls
+- **Reason:** เพิ่มคอมโพเนนต์ Visual Effect ระดับพรีเมียมจาก React Bits ให้พร้อมใช้งานทั้งในรูปแบบ React JSX และ Native Browser DOM
+
+## [2026-08-15 08:15]
+- **Files Modified:** `.agents/skills/gmail-smtp/SKILL.md`, `.agents/skills/gmail-smtp/references/m365-group-delivery.md`, `.agents/skills/gmail-smtp/references/anti-spam-deliverability.md`, `.agents/skills/gmail-smtp/references/gmail-smtp-config.md`, `.agents/skills/gmail-smtp/examples/smtp-send-example.js`, `CHANGELOG.md`
+- **Changes:**
+  - สร้าง Antigravity Skill ชุดสมบูรณ์ `gmail-smtp` ทั้งในระดับ Global (`~/.gemini/config/skills/gmail-smtp`) และ Workspace (`.agents/skills/gmail-smtp/`)
+  - รวบรวมเอกสารคู่มือเชิงลึกและแนวทางปฏิบัติ (Runbook) สำหรับการตั้งค่า Gmail SMTP, การแก้ไขปัญหาการส่งเข้า Microsoft 365 Group / Distribution List (EOP, External Sender Authentication, Group Subscription, SCL Bypass), และหลักการป้องกัน Spam/Junk Mail ตามมาตรฐานสากล (SPF, DKIM, DMARC, RFC 5322/2047, HTML/MIME Hygiene, Sender Warmup)
+- **Reason:** รองรับการทำงานและการอ้างอิงองค์ความรู้ด้าน Email Deliverability, Microsoft 365 Integration, และ Gmail SMTP ในทุกโปรเจกต์อย่างเป็นระบบ
+
 ## [2026-08-15 08:00]
 - **Files Modified:** `smtp-client.js`, `server/smtp.js`, `email-templates.js`, `server/email-templates.js`, `.env`, `CHANGELOG.md`
 - **Changes:**
