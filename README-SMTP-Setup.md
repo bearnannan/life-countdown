@@ -77,7 +77,7 @@
 ### วิธีรัน migration:
 
 1. เปิด Supabase Dashboard → SQL Editor
-2. Copy เนื้อหาจาก `migration.sql`
+2. Copy เนื้อหาจาก `supabase/migrations/001_notification_system.sql`
 3. วาง และกด **Run**
 4. ตรวจสอบว่าสร้างสำเร็จ:
    - Tables: `system_settings`, `notification_events`, `audit_log`
@@ -217,7 +217,7 @@ node test-smtp.js --send your-email@gmail.com
 life-countdown/
 ├── .env                      # Environment variables (DO NOT commit)
 ├── package.json              # ESM config + scripts
-├── migration.sql             # Supabase schema migration
+├── supabase/migrations/      # Supabase schema migrations
 ├── smtp-client.js            # Native SMTP engine (node:net + node:tls)
 ├── email-templates.js        # Email template builder (3 types)
 ├── data-source.js            # Google Sheets JWT fetcher

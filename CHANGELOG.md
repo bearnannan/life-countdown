@@ -1,3 +1,17 @@
+## [2026-08-15 12:33]
+- **Files Modified:** `package.json`, `package-lock.json`, `README-SMTP-Setup.md`, `CHANGELOG.md`
+- **Files/Folders Removed:** `src/`, `implementation_plan.md`, `migration.sql`, `scripts/test-variations.mjs`, `.vercel/`
+- **Changes:**
+  - **Audit & Removal of Unused/Duplicated Artifacts:**
+    - ลบโฟลเดอร์ซ้ำซ้อน `src/` (ซึ่งเป็น duplicate mirror ของ `components/` และมีโฟลเดอร์เปล่า) โดยให้คงไว้เฉพาะ `components/` ซึ่งเป็น Canonical React Bits component library
+    - ลบไฟล์ชั่วคราว `implementation_plan.md` ที่อยู่นอก artifacts directory
+    - ลบไฟล์ `migration.sql` ซ้ำซ้อนที่ Root และปรับให้ `README-SMTP-Setup.md` อ้างอิงไฟล์ทางการ `supabase/migrations/001_notification_system.sql`
+    - ลบสคริปต์ทดสอบชั่วคราว `scripts/test-variations.mjs`
+    - ลบโฟลเดอร์แคช `.vercel/` ในเครื่อง
+  - **Dependency Optimization:**
+    - ถอนการติดตั้งแพ็กเกจที่ไม่ถูกใช้งาน `gsap` ออกจาก `package.json` และ `package-lock.json`
+- **Reason:** ทำความสะอาดโครงสร้างโปรเจกต์ ลบไฟล์และ dependencies ที่ไม่ถูกใช้งานเพื่อความกระชับ เป็นระเบียบ และบำรุงรักษาง่าย
+
 ## [2026-08-15 12:25]
 - **Files Modified:** `js/specular-button.js`, `components/SpecularButton/SpecularButton.jsx`, `src/components/SpecularButton/SpecularButton.jsx`, `server/api.js`, `server/cloud-api.js`, `server/supabase-rest.js`, `CHANGELOG.md`
 - **Changes:**
